@@ -17,13 +17,13 @@ https://en.wikipedia.org/wiki/Image_file_formats
 (NOTE: The uploaded file name should be the same with your student ID.)
 
 
-Pin list Example: sample.pin
-0 1 6 1 2 5 3 5
-6 3 5 6 0 4 2 4
-SYNOPSIS
-%> route PIN_LIST_FILE
-Run-time Example:
-%> route sample.pin
-Number of tracks: 4
-%> ls
-route sample.pin sample.eps sample.png
+Pin list Example: sample.pin \
+0 1 6 1 2 5 3 5 \
+6 3 5 6 0 4 2 4 \
+SYNOPSIS \
+%> route PIN_LIST_FILE \
+Run-time Example: \
+%> route sample.pin \
+Number of tracks: 4 \
+%> ls \
+route sample.pin sample.eps sample.png \
