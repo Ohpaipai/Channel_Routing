@@ -26,4 +26,4 @@ Run-time Example: \
 %> route sample.pin \
 Number of tracks: 4 \
 %> ls \
-route sample.pin sample.eps sample.png \
+route sample.pin sample.eps sample.png 
