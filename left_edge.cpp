@@ -96,19 +96,20 @@ int main(int argc, char *argv[]){
 	for(it=biglong.begin();it!=biglong.end();it++){
 		if(it->first!="0"){
 			bool infind=false;
+			std::string tname;
 			for(itn=track.begin();itn!=track.end();itn++){
-				for(int i=0;i<=itn->second.size();i++){
+				for(int i=0;i<itn->second.size();i++){
 					if((it->second.first>=itn->second[i].begin && it->second.first<=itn->second[i].end) || (it->second.second>=itn->second[i].begin && it->second.second<=itn->second[i].end)){
+						infind=false;
+						break;
 					}
 					else{
 						infind=true;
-						Node tem;
-						tem.begin=it->second.first;
-						tem.end=it->second.second;
-						tem.name=it->first;
-						itn->second.push_back(tem);
-						break;
+						tname=itn->first;
 					}
+				}
+				if(infind){
+					break;
 				}
 			}
 			if(infind==false){
@@ -124,6 +125,13 @@ int main(int argc, char *argv[]){
 				t.push_back(tem);
 				track[temname]=t;		
 				trackcount++;	
+			}
+			else{
+				Node tem;
+				tem.begin=it->second.first;
+				tem.end=it->second.second;
+				tem.name=it->first;
+				track[tname].push_back(tem);
 			}
 		}
 	}
@@ -143,7 +151,13 @@ int main(int argc, char *argv[]){
 		std::cout<<it->first<<"->"<<it->second.first<<"~"<<it->second.second<<std::endl;
 	}
 	*/
-	std::cout<<trackcount-1<<std::endl;
+	std::cout<<trackcount<<std::endl;
+	for(itn=track.begin();itn!=track.end();itn++){
+		std::cout<<"track"<<itn->first<<"-->\n";
+		for(int i=0;i<itn->second.size();i++){
+			std::cout<<itn->second[i].begin<<"~"<<itn->second[i].end<<std::endl;
+		}
+	}
 	return 0;
 	
 }
