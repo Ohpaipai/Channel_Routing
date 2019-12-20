@@ -90,26 +90,26 @@ int main(int argc, char *argv[]){
 	std::cout<<readFile(biglong,top,tail)<<std::endl;
 	//left edge
 	std::map<std::string,std::pair<int,int>>::iterator it;//iterator
-	std::map<std::string,std::vector<Node>>track;
+	std::map<std::string,std::pair<std::vector<Node>,int>>track;
 	int trackcount=0;
-	std::map<std::string,std::vector<Node>>::iterator itn;
+	std::map<std::string,std::pair<std::vector<Node>,int>>::iterator itn;
 	for(it=biglong.begin();it!=biglong.end();it++){
 		if(it->first!="0"){
 			bool infind=false;
-			std::string tname;
 			for(itn=track.begin();itn!=track.end();itn++){
-				for(int i=0;i<itn->second.size();i++){
-					if((it->second.first>=itn->second[i].begin && it->second.first<=itn->second[i].end) || (it->second.second>=itn->second[i].begin && it->second.second<=itn->second[i].end)){
-						infind=false;
-						break;
+				if(itn->second.second > it->second.first){
+					infind=true;
+					Node tem;
+					tem.begin=it->second.first;
+					tem.end=it->second.second;
+					tem.name=it->first;
+					itn->second.first.push_back(tem);
+					if(tem.end > itn->second.second){
+						std::cout<<"track"<<itn->first<<"size"<<tem.end<<std::endl;
+						itn->second.second=tem.end;
 					}
-					else{
-						infind=true;
-						tname=itn->first;
-					}
-				}
-				if(infind){
 					break;
+					
 				}
 			}
 			if(infind==false){
@@ -123,15 +123,11 @@ int main(int argc, char *argv[]){
 				ss>>temname;
 				std::vector<Node>t;
 				t.push_back(tem);
-				track[temname]=t;		
+				std::pair<std::vector<Node>,int>ttem;
+				ttem.first=t;
+				ttem.second=tem.end;
+				track[temname]=ttem;		
 				trackcount++;	
-			}
-			else{
-				Node tem;
-				tem.begin=it->second.first;
-				tem.end=it->second.second;
-				tem.name=it->first;
-				track[tname].push_back(tem);
 			}
 		}
 	}
@@ -154,8 +150,8 @@ int main(int argc, char *argv[]){
 	std::cout<<trackcount<<std::endl;
 	for(itn=track.begin();itn!=track.end();itn++){
 		std::cout<<"track"<<itn->first<<"-->\n";
-		for(int i=0;i<itn->second.size();i++){
-			std::cout<<itn->second[i].begin<<"~"<<itn->second[i].end<<std::endl;
+		for(int i=0;i<itn->second.first.size();i++){
+			std::cout<<itn->second.first[i].begin<<"~"<<itn->second.first[i].end<<std::endl;
 		}
 	}
 	return 0;
