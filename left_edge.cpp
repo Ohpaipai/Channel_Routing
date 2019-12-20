@@ -4,134 +4,133 @@
 #include<string>
 #include<map>
 #include<sstream>
+#include<algorithm>
 typedef struct {
 	int begin;
 	int end;
 	std::string name;
 } Node;
-int readFile(std::map<std::string,std::pair<int,int>>&biglong ,std::vector<std::string>&top ,std::vector<std::string>&tail){ //return pcb long
-	int PCBcount =0;
+
+bool operator<(const Node& s1, const Node& s2)
+{
+	return s1.begin < s2.begin; 
+}
+int readFile(std::map<std::string, Node>& biglong, std::vector<std::string>& top, std::vector<std::string>& tail) { //return pcb long
+	int PCBcount = 0;
 	std::fstream infile;
-	infile.open("test.pin",std::ios::in);
+	infile.open("test.pin", std::ios::in);
 	std::string name;//name
 	std::string line;
-	
-	std::map<std::string,std::pair<int,int>>::iterator it;//iterator
-	
+
+	std::map<std::string, Node>::iterator it;//iterator
+
 	//stringstream
 	std::stringstream ss;
 	std::stringstream files;
 
 	//first chaneel
-	std::getline(infile,line);
-		files.str(line);
-		ss.clear();
-		ss.str("");
-		while(files>>name){
-			ss<<name;
-		    int placenum;
-			ss>>placenum;	   
-			top.push_back(name);	
-			//find
-			it=biglong.find(name);
-			if(it!=biglong.end()){
-				if(it->second.first>PCBcount){
-					it->second.first=PCBcount;
-				}
-				else if(it->second.second<PCBcount){
-					it->second.second=PCBcount;
-				}
+	std::getline(infile, line);
+	files.str(line);
+	ss.clear();
+	ss.str("");
+	while (files >> name) {
+		ss << name;
+		int placenum;
+		ss >> placenum;
+		top.push_back(name);
+		//find
+		it = biglong.find(name);
+		if (it != biglong.end()) {
+			if (it->second.begin > PCBcount) {
+				it->second.begin = PCBcount;
 			}
-			else{
-				std::pair<int,int>tem;
-				tem.first=PCBcount;
-				tem.second=PCBcount;
-				biglong[name]=tem;
+			else if (it->second.end < PCBcount) {
+				it->second.end = PCBcount;
 			}
-			PCBcount++;
-
 		}
+		else {
+			Node tem;
+			tem.begin = PCBcount;
+			tem.end = PCBcount;
+			biglong[name] = tem;
+		}
+		PCBcount++;
+
+	}
 	//second channel
-	PCBcount=0;
-	std::getline(infile,line);
-		files.clear();
-		files.str(line);
-		ss.clear();
-		ss.str("");
-		while(files>>name){
-			ss<<name;
-		    int placenum;
-			ss>>placenum;	   
-			tail.push_back(name);	
-			it=biglong.find(name);
-			if(it!=biglong.end()){
-				if(it->second.first>PCBcount){
-					it->second.first=PCBcount;
-				}
-				else if(it->second.second<PCBcount){
-					it->second.second=PCBcount;
-				}
+	PCBcount = 0;
+	std::getline(infile, line);
+	files.clear();
+	files.str(line);
+	ss.clear();
+	ss.str("");
+	while (files >> name) {
+		ss << name;
+		int placenum;
+		ss >> placenum;
+		tail.push_back(name);
+		it = biglong.find(name);
+		if (it != biglong.end()) {
+			if (it->second.begin > PCBcount) {
+				it->second.begin = PCBcount;
 			}
-			else{
-				std::pair<int,int>tem;
-				tem.first=PCBcount;
-				tem.second=PCBcount;
-				biglong[name]=tem;
+			else if (it->second.end < PCBcount) {
+				it->second.end = PCBcount;
 			}
-			PCBcount++;
-		}	
-	
+		}
+		else {
+			Node tem;
+			tem.begin = PCBcount;
+			tem.end = PCBcount;
+			tem.name = name;
+			biglong[name] = tem;
+		}
+		PCBcount++;
+	}
+
 	return PCBcount;
 }
-int main(int argc, char *argv[]){
+int main(int argc, char* argv[]) {
 	std::vector<std::string>top;//top  channel
 	std::vector<std::string>tail;//tail chanel
-	std::map<std::string,std::pair<int,int>>biglong;//node between longgest
-	std::cout<<readFile(biglong,top,tail)<<std::endl;
+	std::map<std::string, Node>biglong;//node between longgest
+	std::cout << readFile(biglong, top, tail) << std::endl;
+	//sort
+	std::map<std::string, Node>::iterator it;//iterator
+	std::vector<Node>sortNode;
+	for(it=biglong.begin();it!=biglong.end();it++)
+	{
+		sortNode.push_back(it->second);
+	}
+	std::sort(sortNode.begin(),sortNode.end());
 	//left edge
-	std::map<std::string,std::pair<int,int>>::iterator it;//iterator
-	std::map<std::string,std::pair<std::vector<Node>,int>>track;
-	int trackcount=0;
-	std::map<std::string,std::pair<std::vector<Node>,int>>::iterator itn;
-	for(it=biglong.begin();it!=biglong.end();it++){
-		if(it->first!="0"){
-			bool infind=false;
-			for(itn=track.begin();itn!=track.end();itn++){
-				if(itn->second.second > it->second.first){
-					infind=true;
-					Node tem;
-					tem.begin=it->second.first;
-					tem.end=it->second.second;
-					tem.name=it->first;
-					itn->second.first.push_back(tem);
-					if(tem.end > itn->second.second){
-						std::cout<<"track"<<itn->first<<"size"<<tem.end<<std::endl;
-						itn->second.second=tem.end;
-					}
-					break;
-					
-				}
-			}
-			if(infind==false){
-				Node tem;
-				tem.begin=it->second.first;
-				tem.end=it->second.second;
-				tem.name=it->first;
-				std::stringstream ss;
-				ss<<trackcount;
-				std::string temname;
-				ss>>temname;
-				std::vector<Node>t;
-				t.push_back(tem);
-				std::pair<std::vector<Node>,int>ttem;
-				ttem.first=t;
-				ttem.second=tem.end;
-				track[temname]=ttem;		
-				trackcount++;	
+	
+	std::map<std::string, std::pair<std::vector<Node>, int>>track;
+	int trackcount = 0;
+	std::map<std::string, std::pair<std::vector<Node>, int>>::iterator ittrack;
+	for (int i = 0; i < sortNode.size(); i++)//Node sort
+	{
+		bool isfind = false;
+		for (ittrack = track.begin(); ittrack != track.end(); ittrack++) {
+			if (ittrack->second.second < sortNode[i].begin) {
+				ittrack->second.first.push_back(sortNode[i]);
+				ittrack->second.second = sortNode[i].end;
+				isfind = true;
+				break;
 			}
 		}
+		if (isfind == false) {
+			char a = trackcount + 48;
+			std::string tracklayer;
+			tracklayer.push_back(a);
+			std::pair<std::vector<Node>, int>tem;
+			tem.first.push_back(sortNode[i]);
+			tem.second = sortNode[i].end;
+			track[tracklayer] = tem;
+			trackcount++;
+		}
 	}
-	
+
 	//
 	/*debug
 	for(int i=0;i<top.size();i++){
@@ -147,13 +146,14 @@ int main(int argc, char *argv[]){
 		std::cout<<it->first<<"->"<<it->second.first<<"~"<<it->second.second<<std::endl;
 	}
 	*/
-	std::cout<<trackcount<<std::endl;
-	for(itn=track.begin();itn!=track.end();itn++){
-		std::cout<<"track"<<itn->first<<"-->\n";
-		for(int i=0;i<itn->second.first.size();i++){
-			std::cout<<itn->second.first[i].begin<<"~"<<itn->second.first[i].end<<std::endl;
+	std::cout << trackcount << std::endl;
+	for (ittrack = track.begin(); ittrack != track.end(); ittrack++) {
+		std::cout << "track" << ittrack->first << "-->\n";
+		for (int i = 0; i < ittrack->second.first.size(); i++) {
+			std::cout << ittrack->second.first[i].begin << "~" << ittrack->second.first[i].end << std::endl;
 		}
 	}
+	system("pause");
 	return 0;
-	
+
 }
