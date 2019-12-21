@@ -1,14 +1,4 @@
 #include"gui.h"
-typedef struct {
-	int begin;
-	int end;
-	std::string name;
-} Node;
-
-bool operator<(const Node& s1, const Node& s2)
-{
-	return s1.begin < s2.begin; 
-}
 int readFile(std::map<std::string, Node>& biglong, std::vector<std::string>& top, std::vector<std::string>& tail) { //return pcb long
 	int PCBcount = 0;
 	std::fstream infile;
@@ -152,6 +142,7 @@ int main(int argc, char* argv[]) {
 
 
 	//gtk+cairo
+	drawpng(biglong, top, tail,track);
 	drawgui(argc, argv);
 
 	return 0;
