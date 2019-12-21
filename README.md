@@ -1,6 +1,6 @@
 $make
 
-if error please check you have cairo.h or your gtk version is 2.0 \
+if error please check you have cairo.h or your gtk version is 2.0 
 
 gtk2.0 install \
 $sudo apt-get install gnome-core-devel \
