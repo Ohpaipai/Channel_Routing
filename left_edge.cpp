@@ -1,10 +1,4 @@
-#include<iostream>
-#include<vector>
-#include<fstream>
-#include<string>
-#include<map>
-#include<sstream>
-#include<algorithm>
+#include"gui.h"
 typedef struct {
 	int begin;
 	int end;
@@ -90,6 +84,8 @@ int readFile(std::map<std::string, Node>& biglong, std::vector<std::string>& top
 
 	return PCBcount;
 }
+
+
 int main(int argc, char* argv[]) {
 	std::vector<std::string>top;//top  channel
 	std::vector<std::string>tail;//tail chanel
@@ -145,15 +141,19 @@ int main(int argc, char* argv[]) {
 	for(it=biglong.begin();it!=biglong.end();it++){
 		std::cout<<it->first<<"->"<<it->second.first<<"~"<<it->second.second<<std::endl;
 	}
-	*/
+	
 	std::cout << trackcount << std::endl;
 	for (ittrack = track.begin(); ittrack != track.end(); ittrack++) {
 		std::cout << "track" << ittrack->first << "-->\n";
 		for (int i = 0; i < ittrack->second.first.size(); i++) {
 			std::cout << ittrack->second.first[i].begin << "~" << ittrack->second.first[i].end << std::endl;
 		}
-	}
-	system("pause");
+	}*/
+
+
+	//gtk+cairo
+	drawgui(argc, argv);
+
 	return 0;
 
 }

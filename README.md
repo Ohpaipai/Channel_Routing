@@ -1,3 +1,28 @@
+$make \
+
+if error please check you have cairo.h or your gtk version is 2.0 \
+
+gtk2.0 install \
+$sudo apt-get install gnome-core-devel 
+$sudo apt-get install build-essential
+$sudo apt-get install pkg-config
+$sudo apt-get install devhelp
+$sudo apt-get install libglib2.0-doc libgtk2.0-doc
+$sudo apt-get install glade libglade2-dev
+$sudo apt-get install libgtk2.0-dev
+
+cairo.h install \
+$sudo apt-get install libcairo2-dev
+
+if unfined "$pkg-config --cflags --libs cairo" to find cairo 
+and change and Change Makefile " -L /usr/lib/i386-linux-gnu/ -lcairo -I /usr/include/cairo " to your position
+
+reference: https://www.itread01.com/content/1549535247.html
+reference: https://blog.csdn.net/zh19921107/article/details/45094759
+
+
+
+
 # Channel_Routing
 Channel routing is a special routing problem. Wires are connected within a rectangular
 routing region, denoted as channel. All pins are located along the opposite sides of the
