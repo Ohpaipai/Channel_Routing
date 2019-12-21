@@ -36,6 +36,7 @@ int readFile(std::map<std::string, Node>& biglong, std::vector<std::string>& top
 			Node tem;
 			tem.begin = PCBcount;
 			tem.end = PCBcount;
+			tem.name=name;
 			biglong[name] = tem;
 		}
 		PCBcount++;
@@ -96,6 +97,7 @@ int main(int argc, char* argv[]) {
 	std::map<std::string, std::pair<std::vector<Node>, int>>::iterator ittrack;
 	for (int i = 0; i < sortNode.size(); i++)//Node sort
 	{
+		if(sortNode[i].name =="0") continue;
 		bool isfind = false;
 		for (ittrack = track.begin(); ittrack != track.end(); ittrack++) {
 			if (ittrack->second.second < sortNode[i].begin) {
@@ -118,7 +120,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	//
-	/*debug
+/*	debug
 	for(int i=0;i<top.size();i++){
 		std::cout<<top[i]<<" ";
 	}
@@ -131,14 +133,14 @@ int main(int argc, char* argv[]) {
 	for(it=biglong.begin();it!=biglong.end();it++){
 		std::cout<<it->first<<"->"<<it->second.first<<"~"<<it->second.second<<std::endl;
 	}
-	
+*/	
 	std::cout << trackcount << std::endl;
 	for (ittrack = track.begin(); ittrack != track.end(); ittrack++) {
 		std::cout << "track" << ittrack->first << "-->\n";
 		for (int i = 0; i < ittrack->second.first.size(); i++) {
-			std::cout << ittrack->second.first[i].begin << "~" << ittrack->second.first[i].end << std::endl;
+			std::cout <<ittrack->second.first[i].name<<"->" <<ittrack->second.first[i].begin << "~" << ittrack->second.first[i].end << std::endl;
 		}
-	}*/
+	}
 
 
 	//gtk+cairo

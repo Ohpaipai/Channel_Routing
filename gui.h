@@ -11,7 +11,12 @@ typedef struct {
 	 int begin;
      int end;
      std::string name;
-} Node; 
+} Node;
+typedef struct {
+	gint x1;
+	gint x2;
+	std::string windowname;
+}Windownode;
 bool operator<(const Node& s1, const Node& s2)
 {
  	  return s1.begin < s2.begin;
@@ -99,7 +104,12 @@ GtkWidget *window;
 
 }
 void drawpng(std::map<std::string, Node>& biglong, std::vector<std::string>& top, std::vector<std::string>& tail,std::map<std::string, std::pair<std::vector<Node>, int>>& track){
-	
+	std::map<std::string,Windownode>outnode;//window中 上node 資訊
+	std::vector<Windownode>topwnode;
+	std::vector<Windownode>tailwnode;
+	std::map<std::string,Windownode>::iterator it;
+	topwnode.resize(top.size());
+	tailwnode.resize(tail.size());
     cairo_t *cr;                                                                                                                                                                                        
     cairo_surface_t *surface;
 	gint windowwidth, windowheight;
@@ -126,6 +136,25 @@ void drawpng(std::map<std::string, Node>& biglong, std::vector<std::string>& top
 	for(int i=0;i<top.size();i++){
 		cairo_set_source_rgb(cr,0,255,179);
 		cairo_rectangle(cr,initialx,initialy,diewidgth,windowheight/20+2);
+		//紀錄上層座標
+		topwnode[i].x1=initialx;
+		topwnode[i].windowname=top[i];
+		it=outnode.find(top[i]);
+		if(it==outnode.end()){
+			Windownode tem;
+			tem.x1=initialx;
+			tem.x2=initialx+diewidgth;
+			tem.windowname=top[i];	
+			outnode[top[i]]=tem;
+		}
+		else{
+			if(it->second.x1>initialx){
+				it->second.x1=initialx;
+			}
+			else if(it->second.x2<initialx+diewidgth){
+				it->second.x2=initialx+diewidgth;
+			}
+		}
 		cairo_fill(cr);
 		//darw num
 		cairo_set_source_rgb(cr,0,0,0);
@@ -137,24 +166,55 @@ void drawpng(std::map<std::string, Node>& biglong, std::vector<std::string>& top
 	//畫tail layer 方塊
 	initialy =windowheight-(windowheight*2)/20;
 	initialx =12+diewidgth;
-	for(int i=0;i<top.size();i++){
+	for(int i=0;i<tail.size();i++){
 		cairo_set_source_rgb(cr,0,255,179);
-		cairo_rectangle(cr,initialx,windowheight-windowheight*2/20,diewidgth,windowheight/20+2);
+		cairo_rectangle(cr,initialx,initialy,diewidgth,windowheight/20+2);
+		//紀錄下層座標
+		tailwnode[i].x1=initialx;
+		tailwnode[i].windowname=tail[i];
+		it=outnode.find(tail[i]);
+		if(it==outnode.end()){
+			Windownode tem;
+			tem.x1=initialx;
+			tem.x2=initialx+diewidgth;
+			tem.windowname=tail[i];	
+			outnode[tail[i]]=tem;
+		}
+		else{
+			if(it->second.x1>initialx){
+				it->second.x1=initialx;
+			}
+			else if(it->second.x2<initialx+diewidgth){
+				it->second.x2=initialx+diewidgth;
+			}
+		}
 		cairo_fill(cr);
 		//darw num
 		cairo_set_source_rgb(cr,0,0,0);
 		cairo_set_font_size(cr,windowheight/20+2);
 		cairo_move_to(cr,initialx+diewidgth/2,initialy+windowheight/40+5);
-		cairo_show_text(cr,top[i].c_str());	
+		cairo_show_text(cr,tail[i].c_str());	
 		initialx+=diewidgth*2;
 	}
+	//畫tarck track 固定區分程3層
+	gint trackheight=(windowheight-20-2*windowheight/20)/(track.size()*2+1);
+	gint tracky=10+windowheight/20+trackheight;
+	std::map<std::string,std::pair<std::vector<Node>, int>>::iterator ittrack;
+	for(ittrack = track.begin(); ittrack != track.end(); ittrack++) {
+		for(int i=0;i<ittrack->second.first.size();i++){
+			if(ittrack->second.first[i].name=="0") continue;//0為空node不畫
+			
+			it=outnode.find(ittrack->second.first[i].name);
+			cairo_set_source_rgb(cr,255,0,0);
+			cairo_rectangle(cr,it->second.x1,tracky,it->second.x2-it->second.x1,trackheight);
+			cairo_fill(cr);
+			
+			
+		}	
 		
+		tracky+=2*trackheight;
 
-    cairo_select_font_face(cr,"Hello",CAIRO_FONT_SLANT_NORMAL,CAIRO_FONT_WEIGHT_NORMAL);
-    cairo_set_font_size(cr,30.0);
-    cairo_move_to(cr,100,400);
-    cairo_set_source_rgb(cr,0,1,0);
-    cairo_show_text(cr,"Hello World gcc");
+	}
     cairo_surface_write_to_png(surface,"image.png");
 	cairo_destroy(cr);
 	cairo_surface_destroy(surface);
