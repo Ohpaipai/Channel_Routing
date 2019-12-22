@@ -139,7 +139,7 @@ void drawpng(std::map<std::string, Node>& biglong, std::vector<std::string>& top
 		topleg[i].first.y=initialy+(windowheight/hsize+2);
 		topleg[i].first.width=diewidgth;
 		topleg[i].second=top[i];
-		//
+		//紀錄好die頭尾方便畫track
 		it=outnode.find(top[i]);
 		if(it==outnode.end()){
 			Windownode tem;
@@ -178,6 +178,7 @@ void drawpng(std::map<std::string, Node>& biglong, std::vector<std::string>& top
 		//紀錄下層座標
 		tailwnode[i].x1=initialx;
 		tailwnode[i].windowname=tail[i];
+		//紀錄好die頭尾方便畫track
 		it=outnode.find(tail[i]);
 		if(it==outnode.end()){
 			Windownode tem;
@@ -214,12 +215,15 @@ void drawpng(std::map<std::string, Node>& biglong, std::vector<std::string>& top
 
 			cairo_rectangle(cr,it->second.x1,tracky,it->second.x2-it->second.x1,trackheight);
 			cairo_fill(cr);
+			//設定好我接下來畫的legx y位置還有長寬大小
 			for(int j=0;j<topleg.size();j++){
+				//上往下打
 				if(ittrack->second.first[i].name==topleg[j].second){
 					topleg[j].first.height=trackheight*tc+trackheight;
 				}
 
 				if(ittrack->second.first[i].name==tailleg[j].second){
+					//下往上打
 					//tailleg[j].first.height=(track.size()*2+1-tc)*trackheight;
 					tailleg[j].first.height=tailleg[j].first.y-tracky-(windowheight/hsize);
 					tailleg[j].first.y=tracky;
