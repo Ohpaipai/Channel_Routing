@@ -1,8 +1,8 @@
 #include"gui.h"
-int readFile(std::map<std::string, Node>& biglong, std::vector<std::string>& top, std::vector<std::string>& tail) { //return pcb long
+int readFile(std::map<std::string, Node>& biglong, std::vector<std::string>& top, std::vector<std::string>& tail,char *argv[]) { //return pcb long
 	int PCBcount = 0;
 	std::fstream infile;
-	infile.open("test.pin", std::ios::in);
+	infile.open(argv[1], std::ios::in);
 	std::string name;//name
 	std::string line;
 
@@ -81,7 +81,7 @@ int main(int argc, char* argv[]) {
 	std::vector<std::string>top;//top  channel
 	std::vector<std::string>tail;//tail chanel
 	std::map<std::string, Node>biglong;//node between longgest
-	std::cout << readFile(biglong, top, tail) << std::endl;
+	std::cout << readFile(biglong, top, tail,argv) << std::endl;
 	//sort
 	std::map<std::string, Node>::iterator it;//iterator
 	std::vector<Node>sortNode;
@@ -108,9 +108,10 @@ int main(int argc, char* argv[]) {
 			}
 		}
 		if (isfind == false) {
-			char a = trackcount + 48;
+			std::stringstream ss;
+			ss<<trackcount;
 			std::string tracklayer;
-			tracklayer.push_back(a);
+			ss>>tracklayer;
 			std::pair<std::vector<Node>, int>tem;
 			tem.first.push_back(sortNode[i]);
 			tem.second = sortNode[i].end;
@@ -136,7 +137,7 @@ int main(int argc, char* argv[]) {
 */	
 	std::cout << trackcount << std::endl;
 	for (ittrack = track.begin(); ittrack != track.end(); ittrack++) {
-		std::cout << "track" << ittrack->first << "-->\n";
+		std::cout << "track   " << ittrack->first << "   -->\n";
 		for (int i = 0; i < ittrack->second.first.size(); i++) {
 			std::cout <<ittrack->second.first[i].name<<"->" <<ittrack->second.first[i].begin << "~" << ittrack->second.first[i].end << std::endl;
 		}

@@ -15,7 +15,7 @@ cairo.h install \
 $sudo apt-get install libcairo2-dev
 
 if unfined "$pkg-config --cflags --libs cairo" to find cairo \
-and Change Makefile " -L /usr/lib/i386-linux-gnu/ -lcairo -I /usr/include/cairo " to your position 
+and Change Makefile "-lcairo -I /usr/include/cairo " to your position 
 
 reference: https://www.itread01.com/content/1549535247.html \
 reference: https://blog.csdn.net/zh19921107/article/details/45094759 
