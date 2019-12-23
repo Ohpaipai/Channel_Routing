@@ -111,13 +111,13 @@ void drawpng(std::map<std::string, Node>& biglong, std::vector<std::string>& top
     cairo_rectangle(cr,0,0,windowwidth,windowheight);
     cairo_fill(cr);
 	//畫上層layer
-	cairo_set_source_rgb(cr,0,0,0);
+	/*cairo_set_source_rgb(cr,255,124,134);
 	cairo_rectangle(cr,firstx,firsty,windowwidth-firstx*2,windowheight/hsize);
-	cairo_fill(cr);
+	cairo_fill(cr);*/
 	//畫下層layer
-	cairo_set_source_rgb(cr,0,0,0);
+/*	cairo_set_source_rgb(cr,255,124,134);
 	cairo_rectangle(cr,firstx,windowheight-firsty-windowheight/hsize,windowwidth-firstx*2,windowheight/hsize);
-	cairo_fill(cr);
+	cairo_fill(cr);*/
 	std::vector<std::pair<GdkRectangle,std::string>>topleg;//上層方塊座標位置
 	topleg.resize(top.size());
 	std::vector<std::pair<GdkRectangle,std::string>>tailleg;//下層方塊座標位置
