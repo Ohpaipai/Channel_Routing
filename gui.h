@@ -7,6 +7,7 @@
 #include<algorithm>
 #include<gtk/gtk.h>
 #include<cairo.h>
+#include <cairo-svg.h>
 typedef struct {
 	 int begin;
      int end;
@@ -56,21 +57,39 @@ static gboolean on_expose_event(GtkWidget *widget, GdkEventExpose *event, gpoint
     static gint bigx = 20;
     static gint bigy = 200;
     static gint delta = 1;
+for (int i=0;i<topwnode.size();i++){
+	if(topwnode[i].rec.x<width&&topwnode[i].rec.y<height){
+		cairo_set_source_rgb(cr,0,255,179);
+		cairo_rectangle(cr,topwnode[i].rec.x,topwnode[i].rec.y,topwnode[i].rec.width,topwnode[i].rec.height);
+//		std::cout <<topwnode[i].rec.x<<"  "<<topwnode[i].rec.y<<" "<<std::endl;
+		//cairo_rectangle(cr,110,101,110,100);
+		//cairo_set_source_rgb(cr,i,i,i);
+		cairo_fill(cr);
+		cairo_set_source_rgb(cr,0,0,0);
+		cairo_set_font_size(cr,fontsize);
+		cairo_move_to(cr,topPnum[i].x,topPnum[i].y);
+		cairo_show_text(cr,topPnum[i].name.c_str());	
+	//	cairo_fill(cr);
 
+	}
+	else{
+		break;
+	}
+}
 
-    cairo_set_source_rgb(cr,0,0,0);
-	cairo_set_font_size(cr,12.0);
-	cairo_move_to(cr,10,10);
-	cairo_show_text(cr,"we care");
-    cairo_fill(cr);
-    cairo_set_source_rgb(cr,0,255, 255);
-	cairo_rectangle(cr,10,10,400,30);
+//    cairo_set_source_rgb(cr,0,0,0);
+//	cairo_set_font_size(cr,12.0);
+//	cairo_move_to(cr,10,10);
+//	cairo_show_text(cr,"we care");
+//    cairo_fill(cr);
+//    cairo_set_source_rgb(cr,0,255, 255);
+//	cairo_rectangle(cr,10,10,400,30);
 
-    cairo_fill(cr);
+ //   cairo_fill(cr);
 
-    cairo_set_source_rgb(cr,255,0,255 );
-	cairo_rectangle(cr,10,60,400,30);
-    cairo_fill(cr);
+  //  cairo_set_source_rgb(cr,255,0,255 );
+//	cairo_rectangle(cr,10,60,400,30);
+  //  cairo_fill(cr);
 	cairo_destroy(cr);
 
 
@@ -122,7 +141,8 @@ void drawpng(std::map<std::string, Node>& biglong, std::vector<std::string>& top
 	firsty=hsize/5;
 	windowwidth =top.size()*wsize;//螢幕長度
 	windowheight =track.size()*hsize;//螢幕寬度
-    surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,windowwidth,windowheight);//設定好螢幕長寬
+    //surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,windowwidth,windowheight);//設定好螢幕長寬png
+    surface = cairo_svg_surface_create("sample.svg",windowwidth,windowheight);//設定好螢幕長寬svg
     cr=cairo_create(surface);//創建畫布
 	//畫布上白色
 	cairo_set_source_rgb(cr,1,1,1);
@@ -157,7 +177,7 @@ void drawpng(std::map<std::string, Node>& biglong, std::vector<std::string>& top
 		topwnode[i].windowname=top[i];
 		topwnode[i].rec.x=initialx;
 		topwnode[i].rec.y=initialy;
-		topwnode[i].rec.width-diewidgth;
+		topwnode[i].rec.width=diewidgth;
 		topwnode[i].rec.height=windowheight/(hsize)+2;
 		//紀錄leg retangle位置
 		topleg[i].first.x=initialx;
@@ -185,9 +205,10 @@ void drawpng(std::map<std::string, Node>& biglong, std::vector<std::string>& top
 		//darw num
 		cairo_set_source_rgb(cr,0,0,0);
 		cairo_set_font_size(cr,windowheight/(hsize)+2);
-		cairo_move_to(cr,initialx,initialy+windowheight/(hsize*2)+5);
+		cairo_move_to(cr,initialx,initialy+windowheight/(hsize*2)+4);
 		topPnum[i].x=initialx;
-		topPnum[i].y=initialy+windowheight/(hsize*2)+5;
+		topPnum[i].y=initialy+windowheight/(hsize*2)+4;
+		topPnum[i].name=top[i];
 		cairo_show_text(cr,top[i].c_str());	
 		initialx+=diewidgth*2;
 	}
@@ -230,9 +251,10 @@ void drawpng(std::map<std::string, Node>& biglong, std::vector<std::string>& top
 		//darw num
 		cairo_set_source_rgb(cr,0,0,0);
 		cairo_set_font_size(cr,windowheight/(hsize)+2);
-		cairo_move_to(cr,initialx,initialy+windowheight/(hsize*2)+5);
+		cairo_move_to(cr,initialx,initialy+windowheight/(hsize*2)+4);
 		tailPnum[i].x=initialx;
-		tailPnum[i].y=initialy+windowheight/(hsize*2)+5;
+		tailPnum[i].y=initialy+windowheight/(hsize*2)+4;
+		tailPnum[i].name=tail[i];
 		cairo_show_text(cr,tail[i].c_str());	
 		initialx+=diewidgth*2;
 	}
@@ -303,7 +325,7 @@ void drawpng(std::map<std::string, Node>& biglong, std::vector<std::string>& top
 		}
 	}
 
-    cairo_surface_write_to_png(surface,"sample.png");
+//    cairo_surface_write_to_png(surface,"sample.svg");  //png繪圖
 	cairo_destroy(cr);
 	cairo_surface_destroy(surface);
 }	
