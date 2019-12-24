@@ -46,11 +46,14 @@ static gboolean on_expose_event(GtkWidget *widget, GdkEventExpose *event, gpoint
 	cairo_t *cr;
     cr = gdk_cairo_create(widget->window);
 
+//		 cairo_translate(cr, -100, 30);
+
     static gboolean xdirection = TRUE;
     static gint counter = 0;
 
     int width, height;
-    gtk_window_get_size(GTK_WINDOW(widget), &width, &height);
+    gtk_window_get_size(GTK_WINDOW(widget), &width, &height);	
+//	cairo_translate(cr, -1*width/2, -1*height/2);
 
     static gdouble rotate = 0;
 
@@ -59,37 +62,70 @@ static gboolean on_expose_event(GtkWidget *widget, GdkEventExpose *event, gpoint
     static gint delta = 1;
 for (int i=0;i<topwnode.size();i++){
 	if(topwnode[i].rec.x<width&&topwnode[i].rec.y<height){
+		 
 		cairo_set_source_rgb(cr,0,255,179);
 		cairo_rectangle(cr,topwnode[i].rec.x,topwnode[i].rec.y,topwnode[i].rec.width,topwnode[i].rec.height);
-//		std::cout <<topwnode[i].rec.x<<"  "<<topwnode[i].rec.y<<" "<<std::endl;
-		//cairo_rectangle(cr,110,101,110,100);
-		//cairo_set_source_rgb(cr,i,i,i);
 		cairo_fill(cr);
 		cairo_set_source_rgb(cr,0,0,0);
 		cairo_set_font_size(cr,fontsize);
 		cairo_move_to(cr,topPnum[i].x,topPnum[i].y);
 		cairo_show_text(cr,topPnum[i].name.c_str());	
-	//	cairo_fill(cr);
-
+	}
+	else{
+		break;
+	}
+}
+for (int i=0;i<topwnode.size();i++){
+	if(tailwnode[i].rec.x<width&&tailwnode[i].rec.y<height){
+		cairo_set_source_rgb(cr,0,255,179);
+		cairo_rectangle(cr,tailwnode[i].rec.x,tailwnode[i].rec.y,tailwnode[i].rec.width,tailwnode[i].rec.height);
+		cairo_fill(cr);
+		cairo_set_source_rgb(cr,0,0,0);
+		cairo_set_font_size(cr,fontsize);
+		cairo_move_to(cr,tailPnum[i].x,tailPnum[i].y);
+		cairo_show_text(cr,tailPnum[i].name.c_str());	
+	}
+	else{
+		break;
+	}
+}
+std::map<std::string,Windownode>::iterator ittrack;
+//std::cout<<outnode.size()<<std::endl;
+for(ittrack = outnode.begin(); ittrack != outnode.end(); ittrack++){
+	//std::cout <<ittrack->first<<std::endl;	
+	if(ittrack->first =="0") continue;
+	if(ittrack->second.rec.x<width&&ittrack->second.rec.y<height){
+		cairo_set_source_rgb(cr,255,0,0);
+		cairo_rectangle(cr,ittrack->second.rec.x,ittrack->second.rec.y,ittrack->second.rec.width,ittrack->second.rec.height);
+//		std::cout<<ittrack->second.rec.x<<" "<<ittrack->second.rec.y<<std::endl;
+		cairo_fill(cr);
+	
+	}
+	else{
+	}
+	
+}
+for(int i=0; i<topleg.size();i++){
+	if(topleg[i].first.x<width &&topleg[i].first.y<height){
+		cairo_set_source_rgb(cr,0,255,0);
+		cairo_rectangle(cr,topleg[i].first.x,topleg[i].first.y,topleg[i].first.width,topleg[i].first.height);
+		cairo_fill(cr);	
+	}
+	else{
+		break;
+	}
+}
+for(int i=0; i<tailleg.size();i++){
+	if(tailleg[i].first.x<width &&tailleg[i].first.y<height){
+		cairo_set_source_rgb(cr,0,0,255);
+		cairo_rectangle(cr,tailleg[i].first.x,tailleg[i].first.y,tailleg[i].first.width,tailleg[i].first.height);
+		cairo_fill(cr);	
 	}
 	else{
 		break;
 	}
 }
 
-//    cairo_set_source_rgb(cr,0,0,0);
-//	cairo_set_font_size(cr,12.0);
-//	cairo_move_to(cr,10,10);
-//	cairo_show_text(cr,"we care");
-//    cairo_fill(cr);
-//    cairo_set_source_rgb(cr,0,255, 255);
-//	cairo_rectangle(cr,10,10,400,30);
-
- //   cairo_fill(cr);
-
-  //  cairo_set_source_rgb(cr,255,0,255 );
-//	cairo_rectangle(cr,10,60,400,30);
-  //  cairo_fill(cr);
 	cairo_destroy(cr);
 
 
@@ -192,6 +228,7 @@ void drawpng(std::map<std::string, Node>& biglong, std::vector<std::string>& top
 			tem.x2=initialx+diewidgth;
 			tem.windowname=top[i];	
 			outnode[top[i]]=tem;
+			//std::cout<<top[i]<<std::endl;
 		}
 		else{
 			if(it->second.x1>initialx){
@@ -228,7 +265,7 @@ void drawpng(std::map<std::string, Node>& biglong, std::vector<std::string>& top
 		tailwnode[i].windowname=tail[i];
 		tailwnode[i].rec.x=initialx;
 		tailwnode[i].rec.y=initialy;
-		tailwnode[i].rec.width-diewidgth;
+		tailwnode[i].rec.width=diewidgth;
 		tailwnode[i].rec.height=windowheight/(hsize)+2;
 		//紀錄好die頭尾方便畫track
 		it=outnode.find(tail[i]);
@@ -272,6 +309,10 @@ void drawpng(std::map<std::string, Node>& biglong, std::vector<std::string>& top
 				it->second.rec.height=trackheight;
 				continue;//0為空node不畫	
 			}
+				it->second.rec.x=it->second.x1;
+				it->second.rec.y=tracky;
+				it->second.rec.width=it->second.x2-it->second.x1;
+				it->second.rec.height=trackheight;
 			cairo_set_source_rgb(cr,255,0,0);
 
 			cairo_rectangle(cr,it->second.x1,tracky,it->second.x2-it->second.x1,trackheight);
