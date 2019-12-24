@@ -81,7 +81,9 @@ int main(int argc, char* argv[]) {
 	std::vector<std::string>top;//top  channel
 	std::vector<std::string>tail;//tail chanel
 	std::map<std::string, Node>biglong;//node between longgest
-	std::cout << readFile(biglong, top, tail,argv) << std::endl;
+	//std::cout << readFile(biglong, top, tail,argv) << std::endl;
+	readFile(biglong, top, tail,argv);
+	
 	//sort
 	std::map<std::string, Node>::iterator it;//iterator
 	std::vector<Node>sortNode;
@@ -135,13 +137,13 @@ int main(int argc, char* argv[]) {
 		std::cout<<it->first<<"->"<<it->second.first<<"~"<<it->second.second<<std::endl;
 	}
 */	
-	std::cout << trackcount << std::endl;
-	for (ittrack = track.begin(); ittrack != track.end(); ittrack++) {
+	std::cout << "Number of tracks: "<<trackcount << std::endl;
+/*	for (ittrack = track.begin(); ittrack != track.end(); ittrack++) {
 		std::cout << "track   " << ittrack->first << "   -->\n";
 		for (int i = 0; i < ittrack->second.first.size(); i++) {
 			std::cout <<ittrack->second.first[i].name<<"->" <<ittrack->second.first[i].begin << "~" << ittrack->second.first[i].end << std::endl;
 		}
-	}
+	}*/
 
 
 	//gtk+cairo

@@ -15,15 +15,33 @@ typedef struct {
 typedef struct {
 	gint x1;
 	gint x2;
+	GdkRectangle rec;
 	std::string windowname;
 }Windownode;
+typedef struct {
+	gint x;
+	gint y;
+	std::string name;
+}pinnum;
 bool operator<(const Node& s1, const Node& s2)
 {
  	  return s1.begin < s2.begin;
 }
-
+/*my global parameter*/
+int firstx;//初始x座標
+int firsty;//初始y座標
+int fontsize;//pin腳名font size
+std::vector<std::pair<GdkRectangle,std::string>>topleg;//上層pin腳 leg位置
+std::vector<std::pair<GdkRectangle,std::string>>tailleg;//下層pin腳 leg位置
+std::vector<Windownode>topwnode;//上層pin腳位置
+std::vector<Windownode>tailwnode;//下層pin腳位置
+std::map<std::string,Windownode>outnode;//track x座標位置
+std::vector<pinnum>topPnum;//top pin腳名
+std::vector<pinnum>tailPnum;//tail pin腳名
+/*__________________*/
 static gboolean on_expose_event(GtkWidget *widget, GdkEventExpose *event, gpointer data)
 {
+	//cairo_surface_t *cr;
 	cairo_t *cr;
     cr = gdk_cairo_create(widget->window);
 
@@ -89,9 +107,9 @@ void drawgui(int argc, char * argv[]){
 
 }
 void drawpng(std::map<std::string, Node>& biglong, std::vector<std::string>& top, std::vector<std::string>& tail,std::map<std::string, std::pair<std::vector<Node>, int>>& track){
-	std::map<std::string,Windownode>outnode;//window中 上node 資訊
-	std::vector<Windownode>topwnode;
-	std::vector<Windownode>tailwnode;
+	//std::map<std::string,Windownode>outnode;//window中 上node 資訊
+	//std::vector<Windownode>topwnode;
+	//std::vector<Windownode>tailwnode;
 	std::map<std::string,Windownode>::iterator it;
 	topwnode.resize(top.size());
 	tailwnode.resize(tail.size());
@@ -100,8 +118,8 @@ void drawpng(std::map<std::string, Node>& biglong, std::vector<std::string>& top
 	gint windowwidth, windowheight;
 	int wsize=100;
 	int hsize=50;
-	int firstx=wsize/5;
-	int firsty=hsize/5;
+	firstx=wsize/5;
+	firsty=hsize/5;
 	windowwidth =top.size()*wsize;//螢幕長度
 	windowheight =track.size()*hsize;//螢幕寬度
     surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,windowwidth,windowheight);//設定好螢幕長寬
@@ -118,22 +136,29 @@ void drawpng(std::map<std::string, Node>& biglong, std::vector<std::string>& top
 /*	cairo_set_source_rgb(cr,255,124,134);
 	cairo_rectangle(cr,firstx,windowheight-firsty-windowheight/hsize,windowwidth-firstx*2,windowheight/hsize);
 	cairo_fill(cr);*/
-	std::vector<std::pair<GdkRectangle,std::string>>topleg;//上層方塊座標位置
+	//std::vector<std::pair<GdkRectangle,std::string>>topleg;//上層方塊座標位置
 	topleg.resize(top.size());
-	std::vector<std::pair<GdkRectangle,std::string>>tailleg;//下層方塊座標位置
+	//std::vector<std::pair<GdkRectangle,std::string>>tailleg;//下層方塊座標位置
 	tailleg.resize(tail.size());
 	//畫top layer 方塊
 	gint diewidgth =(windowwidth-hsize)/(top.size()*2+1);
 	gint initialx =firstx+diewidgth;
 	gint initialy =firsty;
 	gint trackheight=(windowheight-firsty-(windowheight/hsize)-firsty-(windowheight/hsize))/(track.size()*2+1); //track寬度
-	std::cout<<trackheight<<std::endl;
+//	std::cout<<trackheight<<std::endl;
+	fontsize=windowheight/hsize+2;//font 大小	
+	topPnum.resize(top.size());
+	tailPnum.resize(top.size());
 	for(int i=0;i<top.size();i++){
 		cairo_set_source_rgb(cr,0,255,179);
 		cairo_rectangle(cr,initialx,initialy,diewidgth,windowheight/(hsize)+2);
 		//紀錄上層座標
 		topwnode[i].x1=initialx;
 		topwnode[i].windowname=top[i];
+		topwnode[i].rec.x=initialx;
+		topwnode[i].rec.y=initialy;
+		topwnode[i].rec.width-diewidgth;
+		topwnode[i].rec.height=windowheight/(hsize)+2;
 		//紀錄leg retangle位置
 		topleg[i].first.x=initialx;
 		topleg[i].first.y=initialy+(windowheight/hsize+2);
@@ -161,6 +186,8 @@ void drawpng(std::map<std::string, Node>& biglong, std::vector<std::string>& top
 		cairo_set_source_rgb(cr,0,0,0);
 		cairo_set_font_size(cr,windowheight/(hsize)+2);
 		cairo_move_to(cr,initialx,initialy+windowheight/(hsize*2)+5);
+		topPnum[i].x=initialx;
+		topPnum[i].y=initialy+windowheight/(hsize*2)+5;
 		cairo_show_text(cr,top[i].c_str());	
 		initialx+=diewidgth*2;
 	}
@@ -178,6 +205,10 @@ void drawpng(std::map<std::string, Node>& biglong, std::vector<std::string>& top
 		//紀錄下層座標
 		tailwnode[i].x1=initialx;
 		tailwnode[i].windowname=tail[i];
+		tailwnode[i].rec.x=initialx;
+		tailwnode[i].rec.y=initialy;
+		tailwnode[i].rec.width-diewidgth;
+		tailwnode[i].rec.height=windowheight/(hsize)+2;
 		//紀錄好die頭尾方便畫track
 		it=outnode.find(tail[i]);
 		if(it==outnode.end()){
@@ -200,6 +231,8 @@ void drawpng(std::map<std::string, Node>& biglong, std::vector<std::string>& top
 		cairo_set_source_rgb(cr,0,0,0);
 		cairo_set_font_size(cr,windowheight/(hsize)+2);
 		cairo_move_to(cr,initialx,initialy+windowheight/(hsize*2)+5);
+		tailPnum[i].x=initialx;
+		tailPnum[i].y=initialy+windowheight/(hsize*2)+5;
 		cairo_show_text(cr,tail[i].c_str());	
 		initialx+=diewidgth*2;
 	}
@@ -209,8 +242,14 @@ void drawpng(std::map<std::string, Node>& biglong, std::vector<std::string>& top
 	int tc=1;
 	for(ittrack = track.begin(); ittrack != track.end(); ittrack++,tc+=2) {
 		for(int i=0;i<ittrack->second.first.size();i++){
-			if(ittrack->second.first[i].name=="0") continue;//0為空node不畫	
 			it=outnode.find(ittrack->second.first[i].name);
+			if(ittrack->second.first[i].name=="0") {
+				it->second.rec.x=it->second.x1;
+				it->second.rec.y=tracky;
+				it->second.rec.width=it->second.x2-it->second.x1;
+				it->second.rec.height=trackheight;
+				continue;//0為空node不畫	
+			}
 			cairo_set_source_rgb(cr,255,0,0);
 
 			cairo_rectangle(cr,it->second.x1,tracky,it->second.x2-it->second.x1,trackheight);
@@ -264,7 +303,7 @@ void drawpng(std::map<std::string, Node>& biglong, std::vector<std::string>& top
 		}
 	}
 
-    cairo_surface_write_to_png(surface,"image.png");
+    cairo_surface_write_to_png(surface,"sample.png");
 	cairo_destroy(cr);
 	cairo_surface_destroy(surface);
 }	
