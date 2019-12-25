@@ -8,6 +8,7 @@
 #include<gtk/gtk.h>
 #include<cairo.h>
 #include <cairo-svg.h>
+#include <gdk/gdkkeysyms.h> 
 typedef struct {
 	 int begin;
      int end;
@@ -39,6 +40,7 @@ std::vector<Windownode>tailwnode;//下層pin腳位置
 std::map<std::string,Windownode>outnode;//track x座標位置
 std::vector<pinnum>topPnum;//top pin腳名
 std::vector<pinnum>tailPnum;//tail pin腳名
+int screenshotcount=0;
 /*__________________*/
 static gboolean on_expose_event(GtkWidget *widget, GdkEventExpose *event, gpointer data)
 {
@@ -112,7 +114,7 @@ for(int i=0; i<topleg.size();i++){
 		cairo_fill(cr);	
 	}
 	else{
-		break;
+//		break;
 	}
 }
 for(int i=0; i<tailleg.size();i++){
@@ -122,7 +124,7 @@ for(int i=0; i<tailleg.size();i++){
 		cairo_fill(cr);	
 	}
 	else{
-		break;
+//		break;
 	}
 }
 
@@ -138,9 +140,50 @@ static gboolean time_handler (GtkWidget *widget)
     gtk_widget_queue_draw(widget);
     return TRUE;
 }
+gboolean deal_key_press(GtkWidget *widget, GdkEventKey  *event, gpointer data)  
+{  
+      
+  
+    int key = event->keyval; // 得當傲鍵盤的值 
+   // printf("keyval = %d\n", key);  
+	if(key==32){//節圖功能
+    int width, height;
+    gtk_window_get_size(GTK_WINDOW(widget), &width, &height);
 
+	GdkPixbuf *pixbuf = NULL;
+	pixbuf = gdk_pixbuf_get_from_drawable(NULL, widget->window, NULL,
+            0,0, 0, 0, width, height);  //當前視窗
+	if(NULL == pixbuf){	// 失敗,則輸出錯誤
+		printf("gdk_pixbuf_get_from_drawable failed\n");
+		return	false;
+	}
+	
 
+	cairo_surface_t *surface = NULL;
+	cairo_t *cr;
+	surface = cairo_image_surface_create ( CAIRO_FORMAT_ARGB32,width,height) ;
+	cr = cairo_create( surface) ; 
+	
+	gdk_cairo_set_source_pixbuf(cr, pixbuf, 0, 0);
+	cairo_paint(cr);
+	std::stringstream ss;
+	ss<<screenshotcount;
+	std::string tem;
+	ss>>tem;
 
+	std::string outscreenshot="screenshot";
+	outscreenshot+=tem;
+	outscreenshot+=".png";
+	cairo_surface_write_to_png ( surface,outscreenshot.c_str() ) ;
+	
+	
+	cairo_destroy(cr) ;
+	cairo_surface_destroy( surface) ;
+	screenshotcount++;	
+	printf("gdk_pixbuf screenshot over\n");
+	}	
+    return TRUE;  
+} 
 void drawgui(int argc, char * argv[]){
 	GtkWidget *window;
 
@@ -153,10 +196,16 @@ void drawgui(int argc, char * argv[]){
 
     gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
     gtk_window_set_default_size(GTK_WINDOW(window), 800, 600);
-
-    gtk_widget_set_app_paintable(window, TRUE);
+		// GDK_BUTTON_PRESS_MASK：滑鼠點選事件
+	// GDK_BUTTON_MOTION_MASK：按住滑鼠移動事件
+	//GDK_BUTTON_RELEASE_MASK 滑鼠釋放事件    
+	//GDK_KEY_PRESS_MASK 鍵盤按住事件
+	gtk_widget_add_events(window, GDK_BUTTON_PRESS_MASK | GDK_BUTTON_MOTION_MASK|GDK_BUTTON_RELEASE_MASK|GDK_KEY_PRESS_MASK);	
+    g_signal_connect(window, "key-press-event",G_CALLBACK(deal_key_press), NULL); //鍵盤事件
+	
+	gtk_widget_set_app_paintable(window, TRUE);
     gtk_widget_show_all(window);
-    g_timeout_add(5, (GSourceFunc) time_handler, (gpointer) window);
+    //g_timeout_add(5, (GSourceFunc) time_handler, (gpointer) window);
 
     gtk_main();
 
