@@ -9,32 +9,43 @@
 #include<cairo.h>
 #include <cairo-svg.h>
 #include <gdk/gdkkeysyms.h> 
+//pin腳結構
 typedef struct {
 	 int begin;
      int end;
      std::string name;
 } Node;
+//window上的點資訊
 typedef struct {
 	gint x1;
 	gint x2;
 	GdkRectangle rec;
 	std::string windowname;
 }Windownode;
+//數字位置結構
 typedef struct {
-	gint x;
-	gint y;
+	gdouble x;
+	gdouble y;
 	std::string name;
 }pinnum;
+//比大小
 bool operator<(const Node& s1, const Node& s2)
 {
  	  return s1.begin < s2.begin;
 }
+//自定義長方形結構
 typedef struct {
 	gdouble x;
 	gdouble y;
 	gdouble width;
 	gdouble height;
 }MyRectangle;
+//判斷是否有交集
+gboolean Myrecintersec(MyRectangle r1,MyRectangle r2){
+//	std::cout<<r1.x<<"  "<<r1.y<<"  "<<r1.width<<"  "<<r1.height<<r2.x<<"  "<<r2.y<<" "<<r2.width<<"  "<<r2.height<<std::endl;
+//	std::cout<<r1.x<<"  "<<r1.y<<"  "<<r1.width<<"  "<<r1.height<<r2.x<<"  "<<r2.y<<" "<<r2.width<<"  "<<r2.height<<std::endl;
+	return !( (r1.x+r1.width)<=r2.x || r1.x>=(r2.x+r2.width) || (r1.y+r1.height)<=r2.y || r1.y>=(r2.y+r2.height));
+}
 /*my global parameter*/
 int firstx;//初始x座標
 int firsty;//初始y座標
@@ -46,153 +57,165 @@ std::vector<Windownode>tailwnode;//下層pin腳位置
 std::map<std::string,Windownode>outnode;//track x座標位置
 std::vector<pinnum>topPnum;//top pin腳名
 std::vector<pinnum>tailPnum;//tail pin腳名
-int screenshotcount=0;
-gint limitwindowx=0;
-gint limitwindowy=0;
-double scalesize=1;
-GtkWidget *window ;
-/*__________________*/
+int screenshotcount=0;//節圖count
+gdouble fFontsize;//字形大小
+gdouble limitwindowx=0;//windowsx邊界x左
+gdouble mousex=0;//滑鼠x位置
+gdouble mousey=0;//滑鼠y位置
+gdouble limitwindowy=0;//windows邊界y左
+double scalesize=1;//放大倍率
+GtkWidget *window; //gtkweight window視窗
+
+/*__________________視窗變動event*/
 static gboolean on_expose_event(GtkWidget *widget, GdkEventExpose *event, gpointer data)
 {
-	//cairo_surface_t *cr;
+	//創建cairo
 	cairo_t *cr;
     cr = gdk_cairo_create(widget->window);
-
-//		 cairo_translate(cr, -100, 30);
-
     static gboolean xdirection = TRUE;
     static gint counter = 0;
-
     int width, height;
+	//得到視窗大小
     gtk_window_get_size(GTK_WINDOW(widget), &width, &height);	
-//	cairo_translate(cr, -1*width/2, -1*height/2);
-
-    static gdouble rotate = 0;
-
-    static gint bigx = 20;
-    static gint bigy = 200;
-    static gint delta = 1;
+	//畫上下的pin位置
 for (int i=0;i<topwnode.size();i++){
-	if(limitwindowx<=topwnode[i].rec.x<(width+limitwindowx) && limitwindowy<=topwnode[i].rec.y<(height+limitwindowy)){
+	//計算scale
+	gdouble fx=(topwnode[i].rec.x-mousex)*scalesize+mousex;
+	gdouble fy=(topwnode[i].rec.y-mousey)*scalesize+mousey;
+	gdouble fwidth=(topwnode[i].rec.width)*scalesize;
+	gdouble fheight=(topwnode[i].rec.height)*scalesize;
+	gdouble fnamex=(topPnum[i].x-mousex)*scalesize+mousex;
+	gdouble fnamey=(topPnum[i].y-mousey)*scalesize+mousey;
+	gdouble fFontSize=fontsize*scalesize;
+	if(limitwindowx<=fx<(width+limitwindowx) && limitwindowy<=fy<(height+limitwindowy)){
 		 
 		cairo_set_source_rgb(cr,0,255,179);
-		cairo_rectangle(cr,topwnode[i].rec.x,topwnode[i].rec.y,topwnode[i].rec.width,topwnode[i].rec.height);
+		cairo_rectangle(cr,fx,fy,fwidth,fheight);
 		cairo_fill(cr);
 		cairo_set_source_rgb(cr,0,0,0);
-		cairo_set_font_size(cr,fontsize);
-		cairo_move_to(cr,topPnum[i].x,topPnum[i].y);
+		cairo_set_font_size(cr,fFontsize);
+		cairo_move_to(cr,fnamex,fnamey);
 		cairo_show_text(cr,topPnum[i].name.c_str());	
+		cairo_fill(cr);
 	}
-	else if(limitwindowx<=topwnode[i].rec.x+topwnode[i].rec.width<(width+limitwindowx) && limitwindowy<=topwnode[i].rec.y<(height+limitwindowy)){
+	else if(limitwindowx<=fx+fwidth<(width+limitwindowx) && limitwindowy<=fy<(height+limitwindowy)){
 			
 		cairo_set_source_rgb(cr,0,255,179);
-		cairo_rectangle(cr,topwnode[i].rec.x,topwnode[i].rec.y,topwnode[i].rec.width,topwnode[i].rec.height);
+		cairo_rectangle(cr,fx,fy,fwidth,fheight);
 		cairo_fill(cr);
 		cairo_set_source_rgb(cr,0,0,0);
-		cairo_set_font_size(cr,fontsize);
-		cairo_move_to(cr,topPnum[i].x,topPnum[i].y);
+		cairo_set_font_size(cr,fFontsize);
+		cairo_move_to(cr,fnamex,fnamey);
 		cairo_show_text(cr,topPnum[i].name.c_str());	
+		cairo_fill(cr);
 	}
-	else{
-		break;
-	}
-}
-for (int i=0;i<topwnode.size();i++){
-	if(limitwindowx<=tailwnode[i].rec.x<width+limitwindowx&&limitwindowy<=tailwnode[i].rec.y<height+limitwindowy){
+	
+	//計算scale
+	 fx=(tailwnode[i].rec.x-mousex)*scalesize+mousex;
+	 fy=(tailwnode[i].rec.y-mousey)*scalesize+mousey;
+	 fwidth=(tailwnode[i].rec.width)*scalesize;
+	 fheight=(tailwnode[i].rec.height)*scalesize;
+	 fnamex=(tailPnum[i].x-mousex)*scalesize+mousex;
+	 fnamey=(tailPnum[i].y-mousey)*scalesize+mousey;
+	 fFontSize=fontsize*scalesize;
+	if(limitwindowx<=fx<(width+limitwindowx) && limitwindowy<=fy<(height+limitwindowy)){
+		 
 		cairo_set_source_rgb(cr,0,255,179);
-		cairo_rectangle(cr,tailwnode[i].rec.x,tailwnode[i].rec.y,tailwnode[i].rec.width,tailwnode[i].rec.height);
+		cairo_rectangle(cr,fx,fy,fwidth,fheight);
 		cairo_fill(cr);
 		cairo_set_source_rgb(cr,0,0,0);
-		cairo_set_font_size(cr,fontsize);
-		cairo_move_to(cr,tailPnum[i].x,tailPnum[i].y);
+		cairo_set_font_size(cr,fFontsize);
+		cairo_move_to(cr,fnamex,fnamey);
 		cairo_show_text(cr,tailPnum[i].name.c_str());	
+		cairo_fill(cr);
 	}
-	else if(limitwindowx<=tailwnode[i].rec.x+tailwnode[i].rec.width<(width+limitwindowx) && limitwindowy<=tailwnode[i].rec.y<(height+limitwindowy)){
-		
+	else if(limitwindowx<=fx+fwidth<(width+limitwindowx) && limitwindowy<=fy<(height+limitwindowy)){
+			
 		cairo_set_source_rgb(cr,0,255,179);
-		cairo_rectangle(cr,tailwnode[i].rec.x,tailwnode[i].rec.y,tailwnode[i].rec.width,tailwnode[i].rec.height);
+		cairo_rectangle(cr,fx,fy,fwidth,fheight);
 		cairo_fill(cr);
 		cairo_set_source_rgb(cr,0,0,0);
-		cairo_set_font_size(cr,fontsize);
-		cairo_move_to(cr,tailPnum[i].x,tailPnum[i].y);
+		cairo_set_font_size(cr,fFontsize);
+		cairo_move_to(cr,fnamex,fnamey);
 		cairo_show_text(cr,tailPnum[i].name.c_str());	
-	}
-	else{
-		break;
+		cairo_fill(cr);
 	}
 }
+//畫track
 std::map<std::string,Windownode>::iterator ittrack;
-//std::cout<<outnode.size()<<std::endl;
 for(ittrack = outnode.begin(); ittrack != outnode.end(); ittrack++){
-	//std::cout <<ittrack->first<<std::endl;	
+	//計算scale
+	gdouble fx=(ittrack->second.rec.x-mousex)*scalesize+mousex;
+	gdouble fy=(ittrack->second.rec.y-mousey)*scalesize+mousey;
+	gdouble fwidth=(ittrack->second.rec.width)*scalesize;
+	gdouble fheight=(ittrack->second.rec.height)*scalesize;
 	if(ittrack->first =="0") continue;
-	if(limitwindowx<=ittrack->second.rec.x<width+limitwindowx&&limitwindowy<=ittrack->second.rec.y<height+limitwindowy){
+	if(limitwindowx<= fx <width+limitwindowx&&limitwindowy<= fy <height+limitwindowy){
 		cairo_set_source_rgb(cr,255,0,0);
-		cairo_rectangle(cr,ittrack->second.rec.x,ittrack->second.rec.y,ittrack->second.rec.width,ittrack->second.rec.height);
+		cairo_rectangle(cr,fx,fy,fwidth,fheight);
 		cairo_fill(cr);
 	}
-	else if(limitwindowx<=ittrack->second.rec.x+ittrack->second.rec.width<width+limitwindowx&&limitwindowy<=ittrack->second.rec.y<height+limitwindowy){
+	else if(limitwindowx<=fx+fwidth<width+limitwindowx&&limitwindowy<=fy<height+limitwindowy){
 		cairo_set_source_rgb(cr,255,0,0);
-		cairo_rectangle(cr,ittrack->second.rec.x,ittrack->second.rec.y,ittrack->second.rec.width,ittrack->second.rec.height);
+		cairo_rectangle(cr,fx,fy,fwidth,fheight);
 		cairo_fill(cr);
-	}
-	else{
 	}
 	
 }
+//畫pin跟pin的leg
 for(int i=0; i<topleg.size();i++){
-	if(limitwindowx<=topleg[i].first.x<width+limitwindowx && limitwindowy<=topleg[i].first.y<height+limitwindowy){
+	//計算scale
+	gdouble fx=(topleg[i].first.x-mousex)*scalesize+mousex;
+	gdouble fy=(topleg[i].first.y-mousey)*scalesize+mousey;
+	gdouble fwidth=(topleg[i].first.width)*scalesize;
+	gdouble fheight=(topleg[i].first.height)*scalesize;
+	if(limitwindowx<= fx <width+limitwindowx && limitwindowy<= fy <height+limitwindowy){
 		cairo_set_source_rgb(cr,0,255,0);
-		cairo_rectangle(cr,topleg[i].first.x,topleg[i].first.y,topleg[i].first.width,topleg[i].first.height);
+		cairo_rectangle(cr,fx,fy,fwidth,fheight);
 		cairo_fill(cr);	
 	}
-	else if(limitwindowx<=topleg[i].first.x+topleg[i].first.width<width+limitwindowx && limitwindowy<=topleg[i].first.y<height+limitwindowy){
+	else if(limitwindowx<= fx+fwidth<width+limitwindowx && limitwindowy<=fy<height+limitwindowy){
 		cairo_set_source_rgb(cr,0,255,0);
-		cairo_rectangle(cr,topleg[i].first.x,topleg[i].first.y,topleg[i].first.width,topleg[i].first.height);
+		cairo_rectangle(cr,fx,fy,fwidth,fheight);
 		cairo_fill(cr);
-	}	
-	else{
-//		break;
 	}
-}
-for(int i=0; i<tailleg.size();i++){
-	if(limitwindowx<=tailleg[i].first.x<width+limitwindowx && limitwindowy<=tailleg[i].first.y<height+limitwindowy){
-		cairo_set_source_rgb(cr,0,0,255);
-		cairo_rectangle(cr,tailleg[i].first.x,tailleg[i].first.y,tailleg[i].first.width,tailleg[i].first.height);
-		cairo_fill(cr);	
-	}
-	else if(limitwindowx<=tailleg[i].first.x+tailleg[i].first.width<width+limitwindowx && limitwindowy<=tailleg[i].first.y<height+limitwindowy){
-		cairo_set_source_rgb(cr,0,0,255);
-		cairo_rectangle(cr,tailleg[i].first.x,tailleg[i].first.y,tailleg[i].first.width,tailleg[i].first.height);
-		cairo_fill(cr);	
-	}
-	else{
-//		break;
-	}
-}
 
+	//計算scale
+	fx=(tailleg[i].first.x-mousex)*scalesize+mousex;
+	fy=(tailleg[i].first.y-mousey)*scalesize+mousey;
+	fwidth=(tailleg[i].first.width)*scalesize;
+	fheight=(tailleg[i].first.height)*scalesize;
+
+	if(limitwindowx<= fx <width+limitwindowx && limitwindowy<= fy <height+limitwindowy){
+		cairo_set_source_rgb(cr,0,0,255);
+		cairo_rectangle(cr,fx,fy,fwidth,fheight);
+		cairo_fill(cr);	
+	}
+	else if(limitwindowx<=fx+fwidth<width+limitwindowx && limitwindowy<=fy<height+limitwindowy){
+		cairo_set_source_rgb(cr,0,0,255);
+		cairo_rectangle(cr,fx,fy,fwidth,fheight);
+		cairo_fill(cr);	
+	}
+}
 	cairo_destroy(cr);
-
-
     return FALSE;
 }
-
+//時間函數
 static gboolean time_handler (GtkWidget *widget)
 {
     if (widget->window == NULL) return FALSE;
     gtk_widget_queue_draw(widget);
     return TRUE;
 }
+//鍵盤按壓事件
 gboolean deal_key_press(GtkWidget *widget, GdkEventKey  *event, gpointer data)  
 {  
       
   
     int key = event->keyval; // 得當傲鍵盤的值 
-   // printf("keyval = %d\n", key);  
-	if(key==32){//節圖功能
+	if(key==32){//是否為空白鍵
     int width, height;
     gtk_window_get_size(GTK_WINDOW(widget), &width, &height);
-
 	GdkPixbuf *pixbuf = NULL;
 	pixbuf = gdk_pixbuf_get_from_drawable(NULL, widget->window, NULL,
             0,0, 0, 0, width, height);  //當前視窗
@@ -201,7 +224,7 @@ gboolean deal_key_press(GtkWidget *widget, GdkEventKey  *event, gpointer data)
 		return	false;
 	}
 	
-
+	//節圖
 	cairo_surface_t *surface = NULL;
 	cairo_t *cr;
 	surface = cairo_image_surface_create ( CAIRO_FORMAT_ARGB32,width,height) ;
@@ -227,104 +250,28 @@ gboolean deal_key_press(GtkWidget *widget, GdkEventKey  *event, gpointer data)
 	}	
     return TRUE;  
 }
-void scalePinTrackAndLeg(gint x, gint y,gboolean bigorsmall){
-	if(bigorsmall)
-		scalesize*=1.1;
-	else
-		scalesize/=1.1;
-	fontsize*=scalesize;
-	for (int i=0;i<topwnode.size();i++){
-		topwnode[i].rec.x-=x;
-		topwnode[i].rec.y-=y;
-		topwnode[i].rec.x*=scalesize;
-		topwnode[i].rec.y*=scalesize;
-		topwnode[i].rec.x+=x;
-		topwnode[i].rec.y+=y;
-		topwnode[i].rec.width*=scalesize;
-		topwnode[i].rec.height*=scalesize;
-		topPnum[i].x-=x;
-		topPnum[i].y-=y;
-		topPnum[i].x*=scalesize;
-		topPnum[i].y*=scalesize;
-		topPnum[i].x+=x;
-		topPnum[i].y+=y;
-		/////
-		tailwnode[i].rec.x-=x;
-		tailwnode[i].rec.y-=y;
-		tailwnode[i].rec.x*=scalesize;
-		tailwnode[i].rec.y*=scalesize;
-		tailwnode[i].rec.x+=x;
-		tailwnode[i].rec.y+=y;
-		tailwnode[i].rec.width*=scalesize;
-		tailwnode[i].rec.height*=scalesize;
-		tailPnum[i].x-=x;
-		tailPnum[i].y-=y;
-		tailPnum[i].x*=scalesize;
-		tailPnum[i].y*=scalesize;
-		tailPnum[i].x+=x;
-		tailPnum[i].y+=y;
-	}
-	std::map<std::string,Windownode>::iterator ittrack;
-	for(ittrack = outnode.begin(); ittrack != outnode.end(); ittrack++){
-		ittrack->second.rec.x -=x;
-		ittrack->second.rec.y -=y;
-		ittrack->second.rec.x*=scalesize;
-		ittrack->second.rec.y*=scalesize;
-		ittrack->second.rec.x+=x;
-		ittrack->second.rec.y+=y;
-		ittrack->second.rec.width*=scalesize;	
-		ittrack->second.rec.height*=scalesize;
-		
-	}
-	////
-	for(int i=0; i<topleg.size();i++){
-		topleg[i].first.x -=x;
-		topleg[i].first.y -=y;
-		topleg[i].first.x*=scalesize;
-		topleg[i].first.y*=scalesize;
-		topleg[i].first.x+=x;
-		topleg[i].first.y+=y;
-		topleg[i].first.width*=scalesize;
-		topleg[i].first.height*=scalesize;
-		///
-		tailleg[i].first.x -=x;
-		tailleg[i].first.y -=y;
-		tailleg[i].first.x*=scalesize;
-		tailleg[i].first.y*=scalesize;
-		tailleg[i].first.x+=x;
-		tailleg[i].first.y+=y;
-		tailleg[i].first.width*=scalesize;
-		tailleg[i].first.height*=scalesize;
-	}
-	
-}
+//滑鼠事件
 gboolean deal_mouse_press(GtkWidget *widget, GdkEventButton *event, gpointer data)
 {
-				gint i ;
-				gint j ;
 	switch(event->button){	// 判斷滑鼠點選的型別
-		case 1:
-			//printf("Left Button!!\n");
-			std::cout<<scalesize<<std::endl;
+		case 1://左鍵縮小 且要double click
 			if(event->type == GDK_2BUTTON_PRESS){
-				 i = event->x;
-				 j = event->y;
-				scalePinTrackAndLeg(i,j,false);
-				gtk_widget_queue_draw(window);
-				printf("縮小\n");
+				scalesize=scalesize/1.1;
+				fFontsize/=1.1;
+   				 mousex = event->x;
+				 mousey = event->y;
+				gtk_widget_queue_draw(window); //刷新我的window
 			}
 			break;
-		case 2:
+		case 2://中鍵
 			break;
-		case 3://右鍵
-
-			std::cout<<scalesize<<std::endl;
+		case 3://右鍵放大 且要double click
 			if(event->type == GDK_2BUTTON_PRESS){
-				 i = event->x;
-				 j = event->y;
-				scalePinTrackAndLeg(i,j,true);
-				gtk_widget_queue_draw(window);
-				printf("放大\n");
+				scalesize=scalesize*1.1;
+				fFontsize*=1.1;
+				 mousex = event->x;
+				 mousey = event->y;
+				gtk_widget_queue_draw(window);//刷新我的window
 			}
 			break;
 		default:
@@ -344,7 +291,6 @@ gboolean deal_motion_notify_event(GtkWidget *widget, GdkEventMotion *event, gpoi
 	return TRUE;
 }
 void drawgui(int argc, char * argv[]){
-//	GtkWidget *window;
 
     gtk_init(&argc, &argv);
 
@@ -374,10 +320,8 @@ void drawgui(int argc, char * argv[]){
     gtk_main();
 
 }
+//輸出圖片
 void drawpng(std::map<std::string, Node>& biglong, std::vector<std::string>& top, std::vector<std::string>& tail,std::map<std::string, std::pair<std::vector<Node>, int>>& track){
-	//std::map<std::string,Windownode>outnode;//window中 上node 資訊
-	//std::vector<Windownode>topwnode;
-	//std::vector<Windownode>tailwnode;
 	std::map<std::string,Windownode>::iterator it;
 	topwnode.resize(top.size());
 	tailwnode.resize(tail.size());
@@ -397,24 +341,15 @@ void drawpng(std::map<std::string, Node>& biglong, std::vector<std::string>& top
 	cairo_set_source_rgb(cr,1,1,1);
     cairo_rectangle(cr,0,0,windowwidth,windowheight);
     cairo_fill(cr);
-	//畫上層layer
-	/*cairo_set_source_rgb(cr,255,124,134);
-	cairo_rectangle(cr,firstx,firsty,windowwidth-firstx*2,windowheight/hsize);
-	cairo_fill(cr);*/
-	//畫下層layer
-/*	cairo_set_source_rgb(cr,255,124,134);
-	cairo_rectangle(cr,firstx,windowheight-firsty-windowheight/hsize,windowwidth-firstx*2,windowheight/hsize);
-	cairo_fill(cr);*/
-	//std::vector<std::pair<GdkRectangle,std::string>>topleg;//上層方塊座標位置
+	//開好leg空間
 	topleg.resize(top.size());
-	//std::vector<std::pair<GdkRectangle,std::string>>tailleg;//下層方塊座標位置
 	tailleg.resize(tail.size());
 	//畫top layer 方塊
+	//先定義好die寬度 還有初始座標位置 與track高度
 	gint diewidgth =(windowwidth-hsize)/(top.size()*2+1);
 	gint initialx =firstx+diewidgth;
 	gint initialy =firsty;
 	gint trackheight=(windowheight-firsty-(windowheight/hsize)-firsty-(windowheight/hsize))/(track.size()*2+1); //track寬度
-//	std::cout<<trackheight<<std::endl;
 	fontsize=windowheight/hsize+2;//font 大小	
 	topPnum.resize(top.size());
 	tailPnum.resize(top.size());
@@ -554,16 +489,16 @@ void drawpng(std::map<std::string, Node>& biglong, std::vector<std::string>& top
 	GdkRectangle a;
 	//判斷是否有intersect
 	for(int i=0;i<topleg.size();i++){
-		for(int j=0;j<tailleg.size();j++){
-			gboolean intersectrec=gdk_rectangle_intersect(&topleg[i].first,&tailleg[j].first,&a);
+		//for(int j=0;j<tailleg.size();j++){
+			//gboolean intersectrec=gdk_rectangle_intersect(&topleg[i].first,&tailleg[i].first,&a);
+			gboolean intersectrec=Myrecintersec(topleg[i].first,tailleg[i].first);
 			if(intersectrec)
 			{
+			//	std::cout<<i<<std::endl;
 				topleg[i].first.width/=2;
-				tailleg[j].first.x+=(diewidgth/2);		
-				tailleg[j].first.width/=2;
-				break;
+				tailleg[i].first.x+=(diewidgth/2);		
+				tailleg[i].first.width/=2;
 			}
-		}
 	}
 	//畫出leg
 	for(int i=0;i<topleg.size();i++){
@@ -578,7 +513,7 @@ void drawpng(std::map<std::string, Node>& biglong, std::vector<std::string>& top
 			cairo_fill(cr);
 		}
 	}
-
+	fFontsize=fontsize;
 //    cairo_surface_write_to_png(surface,"sample.svg");  //png繪圖
 	cairo_destroy(cr);
 	cairo_surface_destroy(surface);
