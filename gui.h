@@ -64,6 +64,8 @@ gdouble mousex=0;//滑鼠x位置
 gdouble mousey=0;//滑鼠y位置
 gdouble limitwindowy=0;//windows邊界y左
 double scalesize=1;//放大倍率
+std::vector<MyRectangle>topvia;//上層的via
+std::vector<MyRectangle>tailvia;//下層的via
 GtkWidget *window; //gtkweight window視窗
 
 /*__________________視窗變動event*/
@@ -170,12 +172,12 @@ for(int i=0; i<topleg.size();i++){
 	gdouble fwidth=(topleg[i].first.width)*scalesize;
 	gdouble fheight=(topleg[i].first.height)*scalesize;
 	if(limitwindowx<= fx <width+limitwindowx && limitwindowy<= fy <height+limitwindowy){
-		cairo_set_source_rgb(cr,0,255,0);
+		cairo_set_source_rgba(cr,0,255,0,1);
 		cairo_rectangle(cr,fx,fy,fwidth,fheight);
 		cairo_fill(cr);	
 	}
 	else if(limitwindowx<= fx+fwidth<width+limitwindowx && limitwindowy<=fy<height+limitwindowy){
-		cairo_set_source_rgb(cr,0,255,0);
+		cairo_set_source_rgba(cr,0,255,0,1);
 		cairo_rectangle(cr,fx,fy,fwidth,fheight);
 		cairo_fill(cr);
 	}
@@ -187,12 +189,48 @@ for(int i=0; i<topleg.size();i++){
 	fheight=(tailleg[i].first.height)*scalesize;
 
 	if(limitwindowx<= fx <width+limitwindowx && limitwindowy<= fy <height+limitwindowy){
-		cairo_set_source_rgb(cr,0,0,255);
+		cairo_set_source_rgba(cr,0,0,255,1);
 		cairo_rectangle(cr,fx,fy,fwidth,fheight);
 		cairo_fill(cr);	
 	}
 	else if(limitwindowx<=fx+fwidth<width+limitwindowx && limitwindowy<=fy<height+limitwindowy){
-		cairo_set_source_rgb(cr,0,0,255);
+		cairo_set_source_rgba(cr,0,0,255,1);
+		cairo_rectangle(cr,fx,fy,fwidth,fheight);
+		cairo_fill(cr);	
+	}
+
+
+}
+
+//畫via
+for(int i=0;i<topvia.size();i++){
+	gdouble fx=(topvia[i].x-mousex)*scalesize+mousex;
+	gdouble fy=(topvia[i].y-mousey)*scalesize+mousey;
+	gdouble fwidth=(topvia[i].width)*scalesize;
+	gdouble fheight=(topvia[i].height)*scalesize;
+	if(limitwindowx<= fx <width+limitwindowx && limitwindowy<= fy <height+limitwindowy){
+		cairo_set_source_rgba(cr,255,0,255,1);
+		cairo_rectangle(cr,fx,fy,fwidth,fheight);
+		cairo_fill(cr);	
+	}
+	else if(limitwindowx<= fx+fwidth<width+limitwindowx && limitwindowy<=fy<height+limitwindowy){
+		cairo_set_source_rgba(cr,255,0,255,1);
+		cairo_rectangle(cr,fx,fy,fwidth,fheight);
+		cairo_fill(cr);
+	}
+	//計算scale
+	fx=(tailvia[i].x-mousex)*scalesize+mousex;
+	fy=(tailvia[i].y-mousey)*scalesize+mousey;
+	fwidth=(tailvia[i].width)*scalesize;
+	fheight=(tailvia[i].height)*scalesize;
+
+	if(limitwindowx<= fx <width+limitwindowx && limitwindowy<= fy <height+limitwindowy){
+		cairo_set_source_rgba(cr,255,255,0,1);
+		cairo_rectangle(cr,fx,fy,fwidth,fheight);
+		cairo_fill(cr);	
+	}
+	else if(limitwindowx<=fx+fwidth<width+limitwindowx && limitwindowy<=fy<height+limitwindowy){
+		cairo_set_source_rgba(cr,255,255,0,1);
 		cairo_rectangle(cr,fx,fy,fwidth,fheight);
 		cairo_fill(cr);	
 	}
@@ -325,6 +363,8 @@ void drawpng(std::map<std::string, Node>& biglong, std::vector<std::string>& top
 	std::map<std::string,Windownode>::iterator it;
 	topwnode.resize(top.size());
 	tailwnode.resize(tail.size());
+	topvia.resize(top.size());
+	tailvia.resize(tail.size());
     cairo_t *cr;                                                                                                                                                                                        
     cairo_surface_t *surface;
 	gint windowwidth, windowheight;
@@ -368,6 +408,8 @@ void drawpng(std::map<std::string, Node>& biglong, std::vector<std::string>& top
 		topleg[i].first.y=initialy+(windowheight/hsize+2);
 		topleg[i].first.width=diewidgth;
 		topleg[i].second=top[i];
+		//紀錄via
+		topvia[i].x=initialx;
 		//紀錄好die頭尾方便畫track
 		it=outnode.find(top[i]);
 		if(it==outnode.end()){
@@ -408,6 +450,8 @@ void drawpng(std::map<std::string, Node>& biglong, std::vector<std::string>& top
 		tailleg[i].first.y=initialy+(windowheight/hsize+2);
 		tailleg[i].first.width=diewidgth;
 		tailleg[i].second=tail[i];
+		//紀錄via
+		tailvia[i].x=initialx;
 		//紀錄下層座標
 		tailwnode[i].x1=initialx;
 		tailwnode[i].windowname=tail[i];
@@ -470,6 +514,10 @@ void drawpng(std::map<std::string, Node>& biglong, std::vector<std::string>& top
 				//上往下打
 				if(ittrack->second.first[i].name==topleg[j].second){
 					topleg[j].first.height=trackheight*tc+trackheight;
+					//上層via
+					topvia[j].y=tracky;
+					topvia[j].width=diewidgth;
+					topvia[j].height=trackheight;					
 				}
 
 				if(ittrack->second.first[i].name==tailleg[j].second){
@@ -477,6 +525,10 @@ void drawpng(std::map<std::string, Node>& biglong, std::vector<std::string>& top
 					//tailleg[j].first.height=(track.size()*2+1-tc)*trackheight;
 					tailleg[j].first.height=tailleg[j].first.y-tracky-(windowheight/hsize);
 					tailleg[j].first.y=tracky;
+					//下層via
+					tailvia[j].y=tracky;
+					tailvia[j].width=diewidgth;
+					tailvia[j].height=trackheight;					
 				}
 			}
 			
@@ -498,18 +550,29 @@ void drawpng(std::map<std::string, Node>& biglong, std::vector<std::string>& top
 				topleg[i].first.width/=2;
 				tailleg[i].first.x+=(diewidgth/2);		
 				tailleg[i].first.width/=2;
+				//via
+				topvia[i].width/=2;
+				tailvia[i].x+=(diewidgth/2);
+				tailvia[i].width/=2;
 			}
 	}
 	//畫出leg
 	for(int i=0;i<topleg.size();i++){
+		std::cout<<topvia[i].x<<" "<<topvia[i].y<<" "<<topvia[i].width<<" "<<topvia[i].height<<std::endl;
 		if(topleg[i].second!="0"){
-			cairo_set_source_rgb(cr,0,255,0);
+			cairo_set_source_rgba(cr,0,255,0,1);
 			cairo_rectangle(cr,topleg[i].first.x,topleg[i].first.y,topleg[i].first.width,topleg[i].first.height);
+			cairo_fill(cr);
+			cairo_set_source_rgba(cr,255,0,255,1);
+			cairo_rectangle(cr,topvia[i].x,topvia[i].y,topvia[i].width,topvia[i].height);
 			cairo_fill(cr);
 		}
 		if(tailleg[i].second!="0"){
-			cairo_set_source_rgb(cr,0,0,255);
+			cairo_set_source_rgba(cr,0,0,255,1);
 			cairo_rectangle(cr,tailleg[i].first.x,tailleg[i].first.y,tailleg[i].first.width,tailleg[i].first.height);
+			cairo_fill(cr);
+			cairo_set_source_rgba(cr,255,255,0,1);
+			cairo_rectangle(cr,tailvia[i].x,tailvia[i].y,tailvia[i].width,tailvia[i].height);
 			cairo_fill(cr);
 		}
 	}
