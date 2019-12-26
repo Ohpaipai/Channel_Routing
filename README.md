@@ -20,9 +20,9 @@ and Change Makefile "-lcairo -I /usr/include/cairo " to your position
 reference: https://www.itread01.com/content/1549535247.html \
 reference: https://blog.csdn.net/zh19921107/article/details/45094759 
 
-#界面操作
-滑鼠 右鍵放大 , 左鍵縮小 （都要double click)
-鍵盤 空白鍵為截圖目前視窗輸出為 screenshot"num".png到當前目錄下  "num" 為當前操作幾次 
+# 界面操作
+滑鼠 右鍵放大 , 左鍵縮小 （都要double click)\
+鍵盤 空白鍵為截圖目前視窗輸出為 screenshot"num".png到當前目錄下  "num" 為當前操作幾次\
 視窗大小可以動態調整 將原本沒有畫出的顯示在視窗
 
 # Channel_Routing
