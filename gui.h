@@ -368,8 +368,8 @@ void drawpng(std::map<std::string, Node>& biglong, std::vector<std::string>& top
     cairo_t *cr;                                                                                                                                                                                        
     cairo_surface_t *surface;
 	gint windowwidth, windowheight;
-	int wsize=100;
-	int hsize=50;
+	int wsize=50;
+	int hsize=20;
 	firstx=wsize/5;
 	firsty=hsize/5;
 	windowwidth =top.size()*wsize;//螢幕長度
@@ -390,9 +390,14 @@ void drawpng(std::map<std::string, Node>& biglong, std::vector<std::string>& top
 	gint initialx =firstx+diewidgth;
 	gint initialy =firsty;
 	gint trackheight=(windowheight-firsty-(windowheight/hsize)-firsty-(windowheight/hsize))/(track.size()*2+1); //track寬度
-	fontsize=windowheight/hsize+2;//font 大小	
+	//fontsize=windowheight/hsize+2;//font 大小	
+	//fontsize=windowheight/50;//font 大小	
 	topPnum.resize(top.size());
 	tailPnum.resize(top.size());
+	if(diewidgth>((windowheight/hsize)+2))	
+		fontsize=((windowheight/hsize)+2);
+	else
+		fontsize=diewidgth;
 	for(int i=0;i<top.size();i++){
 		cairo_set_source_rgb(cr,0,255,179);
 		cairo_rectangle(cr,initialx,initialy,diewidgth,windowheight/(hsize)+2);
@@ -431,7 +436,7 @@ void drawpng(std::map<std::string, Node>& biglong, std::vector<std::string>& top
 		cairo_fill(cr);
 		//darw num
 		cairo_set_source_rgb(cr,0,0,0);
-		cairo_set_font_size(cr,windowheight/(hsize)+2);
+		cairo_set_font_size(cr,fontsize);
 		cairo_move_to(cr,initialx,initialy+windowheight/(hsize*2)+4);
 		topPnum[i].x=initialx;
 		topPnum[i].y=initialy+windowheight/(hsize*2)+4;
@@ -479,7 +484,7 @@ void drawpng(std::map<std::string, Node>& biglong, std::vector<std::string>& top
 		cairo_fill(cr);
 		//darw num
 		cairo_set_source_rgb(cr,0,0,0);
-		cairo_set_font_size(cr,windowheight/(hsize)+2);
+		cairo_set_font_size(cr,fontsize);
 		cairo_move_to(cr,initialx,initialy+windowheight/(hsize*2)+4);
 		tailPnum[i].x=initialx;
 		tailPnum[i].y=initialy+windowheight/(hsize*2)+4;
@@ -558,7 +563,6 @@ void drawpng(std::map<std::string, Node>& biglong, std::vector<std::string>& top
 	}
 	//畫出leg
 	for(int i=0;i<topleg.size();i++){
-		std::cout<<topvia[i].x<<" "<<topvia[i].y<<" "<<topvia[i].width<<" "<<topvia[i].height<<std::endl;
 		if(topleg[i].second!="0"){
 			cairo_set_source_rgba(cr,0,255,0,1);
 			cairo_rectangle(cr,topleg[i].first.x,topleg[i].first.y,topleg[i].first.width,topleg[i].first.height);
