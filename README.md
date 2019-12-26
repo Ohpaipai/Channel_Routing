@@ -1,4 +1,8 @@
-$make
+# 安裝及錯誤排除
+
+$make 編譯
+$make clean 清除
+$make debug 可以使用debug模式
 
 if error please check you have cairo.h or your gtk version is 2.0 
 
