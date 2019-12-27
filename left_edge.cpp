@@ -100,6 +100,7 @@ int main(int argc, char* argv[]) {
 	for (int i = 0; i < sortNode.size(); i++)//Node sort
 	{
 		if(sortNode[i].name =="0") continue;
+		if((sortNode[i].begin-sortNode[i].end)==0) continue;
 		bool isfind = false;
 		for (ittrack = track.begin(); ittrack != track.end(); ittrack++) {
 			if (ittrack->second.second < sortNode[i].begin) {
