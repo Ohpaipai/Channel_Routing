@@ -71,8 +71,45 @@ std::vector<MyRectangle>tailvia;//下層的via
 GtkWidget *window; //gtkweight window視窗
 gint transformx=-0;
 gint transformy=0;
-gboolean candraw(int width,int height,int x,int y,int recx,int recy){
-
+gboolean candraw(int width,int height,double x,double y,double recw,double rech){
+	if((limitwindowx<=x&&x<(width+limitwindowx)) && ((limitwindowy<=y)&&(y<(height+limitwindowy)))){
+		return true;
+	}
+	else if((limitwindowx<=x+recw&&x+recw<(width+limitwindowx)) && (limitwindowy<=y+rech&&y+rech<(height+limitwindowy))){
+		return true;
+	}
+	else if((limitwindowx<=x&&x<(width+limitwindowx)) && (limitwindowy<=y+rech&&y+rech<(height+limitwindowy))){
+		return true;
+	}
+	else if((limitwindowx<=x+recw&&x+recw<(width+limitwindowx)) && (limitwindowy<=y&&y<(height+limitwindowy))){
+		return true;
+	}
+	else if(limitwindowx<=x&&x<=width+limitwindowx&&(y<=limitwindowy&&y+rech>=(limitwindowy+height)))
+	{
+		return true;
+	}
+	else if(limitwindowy<=y&&y<=limitwindowy+height&&(x<=limitwindowx&&x+recw>=(width+limitwindowx)))
+	{
+		return true;
+	}
+/*	else if((x<=limitwindowx&&x+recw>=(width+limitwindowx))||(y<=limitwindowy&&y+rech>=(limitwindowy+height))){
+		return true;
+	}*/
+	else if((limitwindowx<=(x+recw)/2&&(x+recw)/2<(width+limitwindowx)) && (limitwindowy<=y+rech&&y+rech<(height+limitwindowy))){
+		return true;
+	}
+	else if((limitwindowx<=(x+recw)/2&&(x+recw)/2<(width+limitwindowx)) && (limitwindowy<=y&&y<(height+limitwindowy))){
+		return true;
+	}
+	else if((limitwindowx<=x&&x<(width+limitwindowx)) && (limitwindowy<=(y+rech)/2&&(y+rech)/2<(height+limitwindowy))){
+		return true;
+	}
+	else if((limitwindowx<=(x+recw)&&(x+recw)<(width+limitwindowx)) && (limitwindowy<=(y+rech)/2&&(y+rech)/2<(height+limitwindowy))){
+		return true;
+	}
+	else{
+		return false;
+	}
 }
 /*__________________視窗變動event*/
 static gboolean on_expose_event(GtkWidget *widget, GdkEventExpose *event, gpointer data)
@@ -99,41 +136,9 @@ for (int i=0;i<topwnode.size();i++){
 	fy+=transformy;
 	fnamex+=transformx;
 	fnamey+=transformy;
-	std::cout<<fx<<" "<<fy<<" "<<std::endl;
-	if((limitwindowx<=fx&&fx<(width+limitwindowx)) && ((limitwindowy<=fy)&&(fy<(height+limitwindowy)))){
+	//std::cout<<fx<<" "<<fy<<" "<<std::endl;
+	if(candraw(width,height,fx,fy,fwidth,fheight)){
 		//std::cout<<i<<std::endl;
-		cairo_set_source_rgb(cr,0,255,179);
-		cairo_rectangle(cr,fx,fy,fwidth,fheight);
-		cairo_fill(cr);
-		cairo_set_source_rgb(cr,0,0,0);
-		cairo_set_font_size(cr,fFontsize);
-		cairo_move_to(cr,fnamex,fnamey);
-		cairo_show_text(cr,topPnum[i].name.c_str());	
-		cairo_fill(cr);
-	}
-	else if((limitwindowx<=fx+fwidth&&fx+fwidth<(width+limitwindowx)) && (limitwindowy<=fy+fheight&&fy+fheight<(height+limitwindowy))){
-		//std::cout<<i<<std::endl;
-		cairo_set_source_rgb(cr,0,255,179);
-		cairo_rectangle(cr,fx,fy,fwidth,fheight);
-		cairo_fill(cr);
-		cairo_set_source_rgb(cr,0,0,0);
-		cairo_set_font_size(cr,fFontsize);
-		cairo_move_to(cr,fnamex,fnamey);
-		cairo_show_text(cr,topPnum[i].name.c_str());	
-		cairo_fill(cr);
-	}
-	else if((limitwindowx<=fx+fwidth&&fx+fwidth<(width+limitwindowx)) && (limitwindowy<=fy&&fy<(height+limitwindowy))){
-		//std::cout<<i<<std::endl;
-		cairo_set_source_rgb(cr,0,255,179);
-		cairo_rectangle(cr,fx,fy,fwidth,fheight);
-		cairo_fill(cr);
-		cairo_set_source_rgb(cr,0,0,0);
-		cairo_set_font_size(cr,fFontsize);
-		cairo_move_to(cr,fnamex,fnamey);
-		cairo_show_text(cr,topPnum[i].name.c_str());	
-		cairo_fill(cr);
-	}
-	else if((limitwindowx<=fx&&fx<(width+limitwindowx)) && (limitwindowy<=fy+fheight&&fy+fheight<(height+limitwindowy))){
 		cairo_set_source_rgb(cr,0,255,179);
 		cairo_rectangle(cr,fx,fy,fwidth,fheight);
 		cairo_fill(cr);
@@ -156,38 +161,7 @@ for (int i=0;i<topwnode.size();i++){
 	fy+=transformy;
 	fnamex+=transformx;
 	fnamey+=transformy;
-	if((limitwindowx<=fx&&fx<(width+limitwindowx)) && (limitwindowy<=fy&&fy<(height+limitwindowy))){
-		 
-		cairo_set_source_rgb(cr,0,255,179);
-		cairo_rectangle(cr,fx,fy,fwidth,fheight);
-		cairo_fill(cr);
-		cairo_set_source_rgb(cr,0,0,0);
-		cairo_set_font_size(cr,fFontsize);
-		cairo_move_to(cr,fnamex,fnamey);
-		cairo_show_text(cr,tailPnum[i].name.c_str());	
-		cairo_fill(cr);
-	}
-	else if((limitwindowx<=fx+fwidth&&fx+fwidth<(width+limitwindowx)) &&( limitwindowy<=fy+fheight&&fy+fheight<(height+limitwindowy))){
-		cairo_set_source_rgb(cr,0,255,179);
-		cairo_rectangle(cr,fx,fy,fwidth,fheight);
-		cairo_fill(cr);
-		cairo_set_source_rgb(cr,0,0,0);
-		cairo_set_font_size(cr,fFontsize);
-		cairo_move_to(cr,fnamex,fnamey);
-		cairo_show_text(cr,tailPnum[i].name.c_str());	
-		cairo_fill(cr);
-	}
-	else if((limitwindowx<=fx&&fx<(width+limitwindowx)) &&( limitwindowy<=fy+fheight&&fy+fheight<(height+limitwindowy))){
-		cairo_set_source_rgb(cr,0,255,179);
-		cairo_rectangle(cr,fx,fy,fwidth,fheight);
-		cairo_fill(cr);
-		cairo_set_source_rgb(cr,0,0,0);
-		cairo_set_font_size(cr,fFontsize);
-		cairo_move_to(cr,fnamex,fnamey);
-		cairo_show_text(cr,tailPnum[i].name.c_str());	
-		cairo_fill(cr);
-	}
-	else if((limitwindowx<=fx+fwidth&&fx+fwidth<(width+limitwindowx)) &&( limitwindowy<=fy&&fy<(height+limitwindowy))){
+	if(candraw(width,height,fx,fy,fwidth,fheight)){
 		cairo_set_source_rgb(cr,0,255,179);
 		cairo_rectangle(cr,fx,fy,fwidth,fheight);
 		cairo_fill(cr);
@@ -208,23 +182,8 @@ for(ittrack = outnode.begin(); ittrack != outnode.end(); ittrack++){
 	gdouble fheight=(ittrack->second.rec.height)*scalesize;
 	fx+=transformx;
 	fy+=transformy;
-	if(ittrack->first =="0") continue;
-	if((limitwindowx<=fx&&fx<(width+limitwindowx)) && (limitwindowy<=fy&&fy<(height+limitwindowy))){
-		cairo_set_source_rgb(cr,255,0,0);
-		cairo_rectangle(cr,fx,fy,fwidth,fheight);
-		cairo_fill(cr);
-	}
-	else if((limitwindowx<=fx+fwidth&&fx+fwidth<(width+limitwindowx)) &&( limitwindowy<=fy+fheight&&fy+fheight<(height+limitwindowy))){
-		cairo_set_source_rgb(cr,255,0,0);
-		cairo_rectangle(cr,fx,fy,fwidth,fheight);
-		cairo_fill(cr);
-	}
-	else if((limitwindowx<=fx&&fx<(width+limitwindowx)) &&( limitwindowy<=fy+fheight&&fy+fheight<(height+limitwindowy))){
-		cairo_set_source_rgb(cr,255,0,0);
-		cairo_rectangle(cr,fx,fy,fwidth,fheight);
-		cairo_fill(cr);
-	}
-	else if((limitwindowx<=fx+fwidth&&fx+fwidth<(width+limitwindowx)) &&( limitwindowy<=fy&&fy<(height+limitwindowy))){
+	if(candraw(width,height,fx,fy,fwidth,fheight)){
+		if(ittrack->first =="0") continue;
 		cairo_set_source_rgb(cr,255,0,0);
 		cairo_rectangle(cr,fx,fy,fwidth,fheight);
 		cairo_fill(cr);
@@ -240,25 +199,10 @@ for(int i=0; i<topleg.size();i++){
 	gdouble fheight=(topleg[i].first.height)*scalesize;
 	fx+=transformx;
 	fy+=transformy;
-	if((limitwindowx<=fx&&fx<(width+limitwindowx)) && (limitwindowy<=fy&&fy<(height+limitwindowy))){
+	if(candraw(width,height,fx,fy,fwidth,fheight)){
 		cairo_set_source_rgba(cr,0,255,0,1);
 		cairo_rectangle(cr,fx,fy,fwidth,fheight);
 		cairo_fill(cr);	
-	}
-	else if((limitwindowx<=fx+fwidth&&fx+fwidth<(width+limitwindowx)) &&( limitwindowy<=fy+fheight&&fy+fheight<(height+limitwindowy))){
-		cairo_set_source_rgba(cr,0,255,0,1);
-		cairo_rectangle(cr,fx,fy,fwidth,fheight);
-		cairo_fill(cr);
-	}
-	else if((limitwindowx<=fx+fwidth&&fx+fwidth<(width+limitwindowx)) &&( limitwindowy<=fy&&fy<(height+limitwindowy))){
-		cairo_set_source_rgba(cr,0,255,0,1);
-		cairo_rectangle(cr,fx,fy,fwidth,fheight);
-		cairo_fill(cr);
-	}
-	else if((limitwindowx<=fx&&fx<(width+limitwindowx)) &&( limitwindowy<=fy+fheight&&fy+fheight<(height+limitwindowy))){
-		cairo_set_source_rgba(cr,0,255,0,1);
-		cairo_rectangle(cr,fx,fy,fwidth,fheight);
-		cairo_fill(cr);
 	}
 	//計算scale
 	fx=(tailleg[i].first.x-mousex)*scalesize+mousex;
@@ -268,22 +212,7 @@ for(int i=0; i<topleg.size();i++){
 	fx+=transformx;
 	fy+=transformy;
 
-	if((limitwindowx<=fx&&fx<(width+limitwindowx)) && (limitwindowy<=fy&&fy<(height+limitwindowy))){
-		cairo_set_source_rgba(cr,0,0,255,1);
-		cairo_rectangle(cr,fx,fy,fwidth,fheight);
-		cairo_fill(cr);	
-	}
-	else if((limitwindowx<=fx+fwidth&&fx+fwidth<(width+limitwindowx)) &&( limitwindowy<=fy+fheight&&fy+fheight<(height+limitwindowy))){
-		cairo_set_source_rgba(cr,0,0,255,1);
-		cairo_rectangle(cr,fx,fy,fwidth,fheight);
-		cairo_fill(cr);	
-	}
-	else if((limitwindowx<=fx+fwidth&&fx+fwidth<(width+limitwindowx)) &&( limitwindowy<=fy&&fy<(height+limitwindowy))){
-		cairo_set_source_rgba(cr,0,0,255,1);
-		cairo_rectangle(cr,fx,fy,fwidth,fheight);
-		cairo_fill(cr);	
-	}
-	else if((limitwindowx<=fx&&fx<(width+limitwindowx)) &&( limitwindowy<=fy+fheight&&fy+fheight<(height+limitwindowy))){
+	if(candraw(width,height,fx,fy,fwidth,fheight)){
 		cairo_set_source_rgba(cr,0,0,255,1);
 		cairo_rectangle(cr,fx,fy,fwidth,fheight);
 		cairo_fill(cr);	
@@ -300,25 +229,10 @@ for(int i=0;i<topvia.size();i++){
 	gdouble fheight=(topvia[i].height)*scalesize;
 	fx+=transformx;
 	fy+=transformy;
-	if((limitwindowx<=fx&&fx<(width+limitwindowx)) && (limitwindowy<=fy&&fy<(height+limitwindowy))){
+	if(candraw(width,height,fx,fy,fwidth,fheight)){
 		cairo_set_source_rgba(cr,255,0,255,1);
 		cairo_rectangle(cr,fx,fy,fwidth,fheight);
 		cairo_fill(cr);	
-	}
-	else if((limitwindowx<=fx+fwidth&&fx+fwidth<(width+limitwindowx)) &&( limitwindowy<=fy+fheight&&fy+fheight<(height+limitwindowy))){
-		cairo_set_source_rgba(cr,255,0,255,1);
-		cairo_rectangle(cr,fx,fy,fwidth,fheight);
-		cairo_fill(cr);
-	}
-	else if((limitwindowx<=fx+fwidth&&fx+fwidth<(width+limitwindowx)) &&( limitwindowy<=fy&&fy<(height+limitwindowy))){
-		cairo_set_source_rgba(cr,255,0,255,1);
-		cairo_rectangle(cr,fx,fy,fwidth,fheight);
-		cairo_fill(cr);
-	}
-	else if((limitwindowx<=fx&&fx<(width+limitwindowx)) &&( limitwindowy<=fy+fheight&&fy+fheight<(height+limitwindowy))){
-		cairo_set_source_rgba(cr,255,0,255,1);
-		cairo_rectangle(cr,fx,fy,fwidth,fheight);
-		cairo_fill(cr);
 	}
 	//計算scale
 	fx=(tailvia[i].x-mousex)*scalesize+mousex;
@@ -328,22 +242,7 @@ for(int i=0;i<topvia.size();i++){
 	fx+=transformx;
 	fy+=transformy;
 
-	if((limitwindowx<=fx&&fx<(width+limitwindowx)) && (limitwindowy<=fy&&fy<(height+limitwindowy))){
-		cairo_set_source_rgba(cr,255,255,0,1);
-		cairo_rectangle(cr,fx,fy,fwidth,fheight);
-		cairo_fill(cr);	
-	}
-	else if((limitwindowx<=fx+fwidth&&fx+fwidth<(width+limitwindowx)) &&( limitwindowy<=fy+fheight&&fy+fheight<(height+limitwindowy))){
-		cairo_set_source_rgba(cr,255,255,0,1);
-		cairo_rectangle(cr,fx,fy,fwidth,fheight);
-		cairo_fill(cr);	
-	}
-	else if((limitwindowx<=fx&&fx<(width+limitwindowx)) &&( limitwindowy<=fy+fheight&&fy+fheight<(height+limitwindowy))){
-		cairo_set_source_rgba(cr,255,255,0,1);
-		cairo_rectangle(cr,fx,fy,fwidth,fheight);
-		cairo_fill(cr);	
-	}
-	else if((limitwindowx<=fx+fwidth&&fx+fwidth<(width+limitwindowx)) &&( limitwindowy<=fy&&fy<(height+limitwindowy))){
+	if(candraw(width,height,fx,fy,fwidth,fheight)){
 		cairo_set_source_rgba(cr,255,255,0,1);
 		cairo_rectangle(cr,fx,fy,fwidth,fheight);
 		cairo_fill(cr);	
@@ -413,14 +312,13 @@ gboolean deal_key_press(GtkWidget *widget, GdkEventKey  *event, gpointer data)
 //滑鼠事件
 gboolean deal_mouse_press(GtkWidget *widget, GdkEventButton *event, gpointer data)
 {
-	if(event->type=GDK_BUTTON_PRESS){		
-			movex=event->x;
-			movey=event->y;	
-			std::cout<<"mouse"<<movex<<" "<<movey<<std::endl;
-	}
 	switch(event->button){	// 判斷滑鼠點選的型別
 		case 1://左鍵縮小 且要double click
+			movex=event->x;
+			movey=event->y;	
+			//std::cout<<"mouse"<<movex<<" "<<movey<<std::endl;
 			if(event->type == GDK_2BUTTON_PRESS){
+			//std::cout<<"mouse"<<movex<<" "<<movey<<std::endl;
 				scalesize=scalesize/1.1;
 				fFontsize/=1.1;
    				 mousex = event->x;
@@ -431,6 +329,9 @@ gboolean deal_mouse_press(GtkWidget *widget, GdkEventButton *event, gpointer dat
 		case 2://中鍵
 			break;
 		case 3://右鍵放大 且要double click
+			movex=event->x;
+			movey=event->y;	
+			//std::cout<<"mouse"<<movex<<" "<<movey<<std::endl;
 			if(event->type == GDK_2BUTTON_PRESS){
 				scalesize=scalesize*1.1;
 				fFontsize*=1.1;
@@ -457,7 +358,6 @@ gboolean deal_motion_notify_event(GtkWidget *widget, GdkEventMotion *event, gpoi
 	movex=event->x;
 	movey=event->y;
 	gtk_widget_queue_draw(window);//刷新我的window
-	std::cout<<limitwindowx<<" "<<limitwindowy<<std::endl;	
 	return TRUE;
 }
 void drawgui(int argc, char * argv[]){
