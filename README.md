@@ -1,7 +1,7 @@
 # 安裝及錯誤排除
 
-$make 編譯
-$make clean 清除
+$make 編譯\
+$make clean 清除\
 $make debug 可以使用debug模式
 
 if error please check you have cairo.h or your gtk version is 2.0 
@@ -27,6 +27,7 @@ reference: https://blog.csdn.net/zh19921107/article/details/45094759
 # 界面操作
 滑鼠 右鍵放大 , 左鍵縮小 （都要double click)\
 鍵盤 空白鍵為截圖目前視窗輸出為 screenshot"num".png到當前目錄下  "num" 為當前操作幾次\
+	 r 鍵為reset到一開始狀況
 視窗大小可以動態調整 將原本沒有畫出的顯示在視窗
 
 # Channel_Routing

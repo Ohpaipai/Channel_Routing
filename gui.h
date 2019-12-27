@@ -250,8 +250,14 @@ gboolean deal_key_press(GtkWidget *widget, GdkEventKey  *event, gpointer data)
 {  
       
   
-    int key = event->keyval; // 得當傲鍵盤的值 
-	if(key==32){//是否為空白鍵
+    int key = event->keyval; // 得當傲鍵盤的值
+	if(key==114){
+		scalesize=1;
+		limitwindowy=0;
+		limitwindowx=0;	
+		gtk_widget_queue_draw(window);
+	}
+	else if(key==32){//是否為空白鍵
     int width, height;
     gtk_window_get_size(GTK_WINDOW(widget), &width, &height);
 	GdkPixbuf *pixbuf = NULL;
@@ -367,9 +373,10 @@ void drawpng(std::map<std::string, Node>& biglong, std::vector<std::string>& top
 	tailvia.resize(tail.size());
     cairo_t *cr;                                                                                                                                                                                        
     cairo_surface_t *surface;
+
 	gint windowwidth, windowheight;
-	int wsize=50;
-	int hsize=20;
+	int wsize=100;
+	int hsize=50;
 	firstx=wsize/5;
 	firsty=hsize/5;
 	windowwidth =top.size()*wsize;//螢幕長度
@@ -582,6 +589,7 @@ void drawpng(std::map<std::string, Node>& biglong, std::vector<std::string>& top
 	}
 	fFontsize=fontsize;
 //    cairo_surface_write_to_png(surface,"sample.svg");  //png繪圖
+//	cairo_surface_set_device_scale(surface, 0.1, 0.1);
 	cairo_destroy(cr);
 	cairo_surface_destroy(surface);
 }	
