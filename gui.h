@@ -406,7 +406,9 @@ void drawpng(std::map<std::string, Node>& biglong, std::vector<std::string>& top
 	firstx=wsize/5;
 	firsty=hsize/5;
 	windowwidth =top.size()*wsize;//螢幕長度
+	if(windowwidth==0) windowwidth=500;
 	windowheight =track.size()*hsize;//螢幕寬度
+	if(windowheight==0) windowheight=500;
     //surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,windowwidth,windowheight);//設定好螢幕長寬png
     surface = cairo_svg_surface_create("sample.svg",windowwidth,windowheight);//設定好螢幕長寬svg
     cr=cairo_create(surface);//創建畫布
