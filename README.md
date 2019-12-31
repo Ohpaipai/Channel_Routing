@@ -4,6 +4,9 @@ $make 編譯\
 $make clean 清除\
 $make debug 可以使用debug模式
 
+./route +pin檔案操作
+輸出為svg跟一個gui界面
+
 if error please check you have cairo.h or your gtk version is 2.0 
 
 gtk2.0 install \

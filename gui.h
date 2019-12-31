@@ -49,9 +49,9 @@ gboolean Myrecintersec(MyRectangle r1,MyRectangle r2){
 /*my global parameter*/
 gdouble movex=0;
 gdouble movey=0;
-int firstx;//初始x座標
-int firsty;//初始y座標
-int fontsize;//pin腳名font size
+double firstx;//初始x座標
+double firsty;//初始y座標
+double fontsize;//pin腳名font size
 std::vector<std::pair<MyRectangle,std::string>>topleg;//上層pin腳 leg位置
 std::vector<std::pair<MyRectangle,std::string>>tailleg;//下層pin腳 leg位置
 std::vector<Windownode>topwnode;//上層pin腳位置
